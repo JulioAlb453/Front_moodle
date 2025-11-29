@@ -1,0 +1,82 @@
+/* Estilos específicos para operaciones concurrentes */
+.concurrent-operations-panel {
+    background: #f8f9fa;
+    border: 2px dashed #dee2e6;
+    border-radius: 10px;
+    padding: 20px;
+}
+
+.operation-item {
+    padding: 15px;
+    margin-bottom: 10px;
+    border-radius: 8px;
+    background: white;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    transition: all 0.3s ease;
+}
+
+.operation-item:hover {
+    transform: translateX(5px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+}
+
+.operation-status {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    display: inline-block;
+    margin-right: 8px;
+}
+
+.status-pending { background-color: #ffc107; }
+.status-running { background-color: #17a2b8; animation: pulse 1.5s infinite; }
+.status-success { background-color: #28a745; }
+.status-error { background-color: #dc3545; }
+
+@keyframes pulse {
+    0% { opacity: 1; }
+    50% { opacity: 0.5; }
+    100% { opacity: 1; }
+}
+
+/* Grid de operaciones */
+.operations-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 15px;
+    margin-top: 20px;
+}
+
+/* Contadores en tiempo real */
+.counter {
+    font-size: 1.5em;
+    font-weight: bold;
+    text-align: center;
+}
+
+.counter.success { color: #28a745; }
+.counter.warning { color: #ffc107; }
+.counter.error { color: #dc3545; }
+
+/* Log de operaciones */
+.operations-log {
+    max-height: 400px;
+    overflow-y: auto;
+    background: #2d3748;
+    color: #e2e8f0;
+    padding: 15px;
+    border-radius: 5px;
+    font-family: 'Courier New', monospace;
+    font-size: 0.9em;
+}
+
+.log-entry {
+    margin-bottom: 5px;
+    padding: 5px;
+    border-left: 3px solid transparent;
+}
+
+.log-success { border-left-color: #48bb78; }
+.log-warning { border-left-color: #ed8936; }
+.log-error { border-left-color: #f56565; }
+.log-info { border-left-color: #4299e1; }
