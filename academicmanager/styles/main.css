@@ -1,98 +1,27 @@
-/* Estilos principales para Academic Manager */
-.academic-manager-container {
-    padding: 20px;
-    max-width: 1400px;
+:root {
+    --primary: #3498db;
+    --secondary: #2c3e50;
+    --success: #27ae60;
+    --warning: #f39c12;
+    --danger: #e74c3c;
+    --light: #ecf0f1;
+    --dark: #34495e;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', sans-serif;
+    background: #f5f6fa;
+    color: var(--dark);
+}
+
+.container {
+    max-width: 1200px;
     margin: 0 auto;
-}
-
-/* Cards modernas */
-.am-card {
-    border: none;
-    border-radius: 15px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    transition: all 0.3s ease;
-    margin-bottom: 20px;
-}
-
-.am-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
-}
-
-/* Botones de acción concurrente */
-.concurrent-btn {
-    transition: all 0.3s ease;
-    position: relative;
-    overflow: hidden;
-}
-
-.concurrent-btn:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
-}
-
-.concurrent-btn.processing::after {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: -100%;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
-    animation: processing 1.5s infinite;
-}
-
-@keyframes processing {
-    0% { left: -100%; }
-    100% { left: 100%; }
-}
-
-/* Estados de operaciones */
-.operation-success {
-    border-left: 4px solid #28a745;
-    background-color: #f8fff9;
-}
-
-.operation-warning {
-    border-left: 4px solid #ffc107;
-    background-color: #fffef0;
-}
-
-.operation-error {
-    border-left: 4px solid #dc3545;
-    background-color: #fff5f5;
-}
-
-/* Animaciones para carga */
-.fade-in {
-    animation: fadeIn 0.5s ease-in-out;
-}
-
-@keyframes fadeIn {
-    from { opacity: 0; transform: translateY(20px); }
-    to { opacity: 1; transform: translateY(0); }
-}
-
-/* Responsive */
-@media (max-width: 768px) {
-    .academic-manager-container {
-        padding: 10px;
-    }
-    
-    .btn-group-vertical .btn {
-        font-size: 0.8rem;
-        padding: 6px 12px;
-    }
-}
-
-/* Badges personalizados */
-.status-badge {
-    font-size: 0.7em;
-    padding: 4px 8px;
-    border-radius: 10px;
-}
-
-/* Progress bars animadas */
-.progress-bar-animated {
-    animation: progress-bar-stripes 1s linear infinite;
+    padding: 20px;
 }

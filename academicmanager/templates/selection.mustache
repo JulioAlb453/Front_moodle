@@ -1,101 +1,24 @@
-<div class="academic-manager-container">
-    <div class="row justify-content-center">
-        <div class="col-md-8">
-            <div class="card shadow-lg">
-                <div class="card-header bg-primary text-white">
-                    <h3 class="mb-0">
-                        <i class="fas fa-sliders-h me-2"></i>
-                        {{#str}}platform_configuration, local_academicmanager{{/str}}
-                    </h3>
-                </div>
-                <div class="card-body p-4">
-                    <!-- Selector de Programa -->
-                    <div class="mb-4">
-                        <label class="form-label fw-bold text-dark">
-                            <i class="fas fa-graduation-cap me-2"></i>
-                            {{#str}}study_program, local_academicmanager{{/str}}
-                        </label>
-                        <select class="form-select form-select-lg" id="programSelect">
-                            <option value="">{{#str}}select_program, local_academicmanager{{/str}}</option>
-                            {{#programs}}
-                            <option value="{{id}}">{{name}} - {{cuatrimestres}} cuatrimestres</option>
-                            {{/programs}}
-                        </select>
-                    </div>
-
-                    <!-- Selector de Cuatrimestre -->
-                    <div class="mb-4">
-                        <label class="form-label fw-bold text-dark">
-                            <i class="fas fa-calendar-alt me-2"></i>
-                            {{#str}}semester, local_academicmanager{{/str}}
-                        </label>
-                        <select class="form-select form-select-lg" id="semesterSelect" disabled>
-                            <option value="">{{#str}}select_semester, local_academicmanager{{/str}}</option>
-                            {{#semesters}}
-                            <option value="{{number}}">{{number}}° Cuatrimestre</option>
-                            {{/semesters}}
-                        </select>
-                    </div>
-
-                    <!-- Información del Programa -->
-                    <div id="programInfo" class="alert alert-info d-none">
-                        <h6><i class="fas fa-info-circle me-2"></i>Información del Programa</h6>
-                        <div id="programDetails"></div>
-                    </div>
-
-                    <!-- Botón Continuar -->
-                    <div class="d-grid mt-4">
-                        <button class="btn btn-success btn-lg" id="continueBtn" disabled>
-                            <i class="fas fa-arrow-right me-2"></i>
-                            {{#str}}continue_to_subjects, local_academicmanager{{/str}}
-                        </button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Panel de Administración -->
-            <div class="card mt-4">
-                <div class="card-header bg-warning text-dark">
-                    <h5 class="mb-0">
-                        <i class="fas fa-cogs me-2"></i>
-                        {{#str}}administration_panel, local_academicmanager{{/str}}
-                    </h5>
-                </div>
-                <div class="card-body">
-                    <div class="row g-3">
-                        <div class="col-md-4">
-                            <button class="btn btn-outline-primary w-100 admin-btn" data-action="programs">
-                                <i class="fas fa-plus me-2"></i>Programas
-                            </button>
-                        </div>
-                        <div class="col-md-4">
-                            <button class="btn btn-outline-success w-100 admin-btn" data-action="subjects">
-                                <i class="fas fa-book me-2"></i>Asignaturas
-                            </button>
-                        </div>
-                        <div class="col-md-4">
-                            <button class="btn btn-outline-info w-100 admin-btn" data-action="teachers">
-                                <i class="fas fa-chalkboard-teacher me-2"></i>Docentes
-                            </button>
-                        </div>
-                        <div class="col-md-4">
-                            <button class="btn btn-outline-warning w-100 admin-btn" data-action="students">
-                                <i class="fas fa-users me-2"></i>Estudiantes
-                            </button>
-                        </div>
-                        <div class="col-md-4">
-                            <button class="btn btn-outline-secondary w-100 admin-btn" data-action="groups">
-                                <i class="fas fa-layer-group me-2"></i>Grupos
-                            </button>
-                        </div>
-                        <div class="col-md-4">
-                            <button class="btn btn-outline-dark w-100 admin-btn" data-action="massive">
-                                <i class="fas fa-rocket me-2"></i>Acciones Masivas
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
+<div class="card">
+    <div class="card-header">
+        <h3>Selección de Programa</h3>
+    </div>
+    <div class="form-group">
+        <label class="form-label">Programa de Estudio</label>
+        <select class="form-control" id="program-select">
+            <option value="">Seleccione un programa</option>
+            {{#programs}}
+            <option value="{{id}}">{{nombre}}</option>
+            {{/programs}}
+        </select>
+    </div>
+    
+    <div class="form-group">
+        <label class="form-label">Cuatrimestre</label>
+        <select class="form-control" id="semester-select" disabled>
+            <option value="">Seleccione cuatrimestre</option>
+            {{#semesters}}
+            <option value="{{.}}">Cuatrimestre {{.}}</option>
+            {{/semesters}}
+        </select>
     </div>
 </div>

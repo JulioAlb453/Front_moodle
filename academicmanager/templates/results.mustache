@@ -1,77 +1,27 @@
-<div class="concurrent-results-container">
-    <div class="card">
-        <div class="card-header bg-info text-white">
-            <h4 class="mb-0">
-                <i class="fas fa-tasks me-2"></i>
-                Resultados de Operaciones Concurrentes
-            </h4>
-        </div>
-        <div class="card-body">
-            <!-- Resumen Ejecutivo -->
-            <div class="row mb-4">
-                <div class="col-md-3">
-                    <div class="card bg-primary text-white text-center">
-                        <div class="card-body">
-                            <h3 id="totalOperations">0</h3>
-                            <small>Total Operaciones</small>
-                        </div>
-                    </div>
+<div class="card">
+    <div class="card-header">
+        <h3>Resultados de Operaciones</h3>
+        <button class="btn btn-sm btn-secondary" onclick="clearResults()">Limpiar</button>
+    </div>
+    
+    <div class="results-container">
+        {{#operations}}
+        <div class="thread-status {{status}}">
+            <div class="thread-info">
+                <strong>{{operation}}</strong>
+                <span class="thread-message">{{message}}</span>
+                {{#progress}}
+                <div class="thread-progress">
+                    <div class="thread-progress-bar" style="width: {{progress}}%"></div>
                 </div>
-                <div class="col-md-3">
-                    <div class="card bg-success text-white text-center">
-                        <div class="card-body">
-                            <h3 id="successOperations">0</h3>
-                            <small>Éxitos</small>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-3">
-                    <div class="card bg-warning text-dark text-center">
-                        <div class="card-body">
-                            <h3 id="warningOperations">0</h3>
-                            <small>Advertencias</small>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-3">
-                    <div class="card bg-danger text-white text-center">
-                        <div class="card-body">
-                            <h3 id="errorOperations">0</h3>
-                            <small>Errores</small>
-                        </div>
-                    </div>
-                </div>
+                {{/progress}}
             </div>
-
-            <!-- Barra de Progreso General -->
-            <div class="mb-4">
-                <div class="d-flex justify-content-between mb-2">
-                    <span>Progreso General</span>
-                    <span id="progressPercent">0%</span>
-                </div>
-                <div class="progress" style="height: 20px;">
-                    <div id="globalProgress" class="progress-bar progress-bar-striped progress-bar-animated" 
-                         role="progressbar" style="width: 0%"></div>
-                </div>
-            </div>
-
-            <!-- Lista Detallada de Resultados -->
-            <div id="detailedResults">
-                <!-- Los resultados se cargan dinámicamente aquí -->
-            </div>
-
-            <!-- Botones de Acción -->
-            <div class="d-flex gap-2 mt-4">
-                <button class="btn btn-primary" id="exportResultsBtn">
-                    <i class="fas fa-download me-2"></i>Exportar Resultados
-                </button>
-                <button class="btn btn-secondary" id="newOperationBtn">
-                    <i class="fas fa-plus me-2"></i>Nueva Operación
-                </button>
-                <button class="btn btn-success" id="viewInMoodleBtn">
-                    <i class="fas fa-external-link-alt me-2"></i>Ver en Moodle
-                </button>
+            <div class="thread-status-badge">
+                {{#success}}✅{{/success}}
+                {{#error}}❌{{/error}}
+                {{#running}}⏳{{/running}}
             </div>
         </div>
+        {{/operations}}
     </div>
 </div>
