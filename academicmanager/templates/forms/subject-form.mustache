@@ -1,33 +1,80 @@
 <div class="card">
     <div class="card-header">
         <h3>Crear Asignatura</h3>
+        <button class="btn btn-sm btn-secondary" onclick="hideForm()">Cancelar</button>
     </div>
-    <form id="subject-form">
-        <div class="form-group">
-            <label class="form-label">Nombre de la Asignatura</label>
-            <input type="text" class="form-control" name="subject_name" required>
+    
+    <form id="subject-form" onsubmit="return handleSubjectSubmit(event)">
+        <div class="row">
+            <div class="col">
+                <div class="form-group">
+                    <label class="form-label">Nombre de la Asignatura *</label>
+                    <input type="text" class="form-control" name="subject_name" required 
+                           placeholder="Ej: Programación Concurrente">
+                </div>
+            </div>
+            <div class="col">
+                <div class="form-group">
+                    <label class="form-label">Código de Asignatura *</label>
+                    <input type="text" class="form-control" name="subject_code" required 
+                           placeholder="Ej: PC-101">
+                </div>
+            </div>
+        </div>
+        
+        <div class="row">
+            <div class="col">
+                <div class="form-group">
+                    <label class="form-label">Programa *</label>
+                    <select class="form-control" name="program_id" required id="program-select-form">
+                        <option value="">Seleccione programa</option>
+                        {{#programs}}
+                        <option value="{{id}}">{{nombre}}</option>
+                        {{/programs}}
+                    </select>
+                </div>
+            </div>
+            <div class="col">
+                <div class="form-group">
+                    <label class="form-label">Cuatrimestre *</label>
+                    <select class="form-control" name="semester" required id="semester-select-form">
+                        <option value="">Seleccione cuatrimestre</option>
+                        {{#semesters}}
+                        <option value="{{.}}">{{.}}</option>
+                        {{/semesters}}
+                    </select>
+                </div>
+            </div>
         </div>
         
         <div class="form-group">
-            <label class="form-label">Programa</label>
-            <select class="form-control" name="program_id" required>
-                <option value="">Seleccione programa</option>
-                {{#programs}}
-                <option value="{{id}}">{{nombre}}</option>
-                {{/programs}}
+            <label class="form-label">Créditos</label>
+            <input type="number" class="form-control" name="credits" min="1" max="10" value="5">
+        </div>
+        
+        <div class="form-group">
+            <label class="form-label">Horas Semanales</label>
+            <input type="number" class="form-control" name="weekly_hours" min="1" max="20" value="4">
+        </div>
+        
+        <div class="form-group">
+            <label class="form-label">Tipo de Asignatura</label>
+            <select class="form-control" name="subject_type">
+                <option value="obligatoria">Obligatoria</option>
+                <option value="optativa">Optativa</option>
+                <option value="electiva">Electiva</option>
             </select>
         </div>
         
         <div class="form-group">
-            <label class="form-label">Cuatrimestre</label>
-            <select class="form-control" name="semester" required>
-                <option value="">Seleccione cuatrimestre</option>
-                {{#semesters}}
-                <option value="{{.}}">{{.}}</option>
-                {{/semesters}}
-            </select>
+            <label class="form-label">Descripción</label>
+            <textarea class="form-control" name="description" rows="3" 
+                      placeholder="Descripción de la asignatura..."></textarea>
         </div>
         
-        <button type="submit" class="btn btn-success">Crear Asignatura</button>
+        <button type="submit" class="btn btn-success">
+            <span class="spinner-border spinner-border-sm d-none" id="subject-spinner"></span>
+            Crear Asignatura
+        </button>
     </form>
 </div>

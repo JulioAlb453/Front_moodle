@@ -1,185 +1,247 @@
 class AcademicManager {
   constructor() {
+    // Inicializar gestor de configuración
+    this.configManager = new ConfigManager();
+    this.config = this.configManager.init();
+
+    // Inicializar renderizador con configuración
     this.renderer = new MustacheRenderer();
-    this.moodleAPI = new MoodleAPI(moodleData.baseUrl, moodleData.sesskey);
-    this.concurrentActions = new ConcurrentActions(this.moodleAPI);
+    this.currentView = this.config.currentAction;
+
+    this.uiRenderer = null;
+    this.router = null;
   }
 
   async init() {
-    console.log("Academic Manager iniciado");
+    console.log("Academic Manager - Inicializando coordinador");
 
-    // Cargar templates primero
-    await this.renderer.loadAllTemplates();
+    // 1. CARGAR TEMPLATES PRIMERO
+    console.log("Cargando templates Mustache...");
+    const templatesLoaded = await this.renderer.loadAllTemplates();
 
-    // Renderizar toda la interfaz
-    this.renderInterface();
+    if (!templatesLoaded) {
+      console.error("Error crítico: No se pudieron cargar los templates");
+      // Podrías mostrar un error al usuario aquí
+      return;
+    }
 
-    this.setupNavigation();
-    this.setupEventListeners();
-    await this.loadInitialData();
+    console.log("Templates cargados exitosamente");
 
-    // Mostrar vista según la acción actual
-    this.showView(moodleData.currentAction);
+    // 2. Inicializar UI Renderer (ahora con templates cargados)
+    await this.initializeUIRenderer();
+
+    // 3. Renderizar interfaz principal
+    await this.renderMainInterface();
+
+    this.initializeRouter();
+
+    // 4. Mostrar vista inicial
+    await this.showView(this.currentView);
+
+    console.log("Coordinador inicializado correctamente");
   }
 
-  renderInterface() {
-    const appContainer = document.getElementById("academic-manager-app");
-    if (!appContainer) return;
-
-    appContainer.innerHTML = `
-            <!-- Navegación -->
-            <nav class="header">
-                <div class="nav-bar">
-                    <div class="logo">Academic Manager</div>
-                    <ul class="nav-links">
-                        <li><a href="#" id="nav-main">Inicio</a></li>
-                        <li><a href="#" id="nav-admin">Administración</a></li>
-                        <li><a href="#" id="nav-bulk">Acciones Masivas</a></li>
-                    </ul>
-                    <div class="user-info">
-                        ${moodleData.userName}
-                    </div>
-                </div>
-            </nav>
-
-            <div class="container">
-                <!-- Vista principal -->
-                <div id="main-view" class="view">
-                    <div id="selection-container"></div>
-                    <div id="subjects-container"></div>
-                </div>
-
-                <!-- Vista de administración -->
-                <div id="admin-view" class="view">
-                    <div id="admin-container">
-                        <div class="card">
-                            <div class="card-header">
-                                <h3>Panel de Administración</h3>
-                            </div>
-                            <div class="admin-actions">
-                                <div class="action-group">
-                                    <h4>Acciones Individuales</h4>
-                                    <button class="btn btn-primary" onclick="academicManager.showCreateProgramForm()">
-                                        Crear Programa
-                                    </button>
-                                    <button class="btn btn-primary" onclick="academicManager.showCreateSubjectForm()">
-                                        Crear Asignatura
-                                    </button>
-                                    <button class="btn btn-primary" onclick="academicManager.showCreateTeacherForm()">
-                                        Crear Docente
-                                    </button>
-                                </div>
-                                
-                                <div class="action-group">
-                                    <h4>Acciones Masivas</h4>
-                                    <button class="btn btn-warning" onclick="academicManager.bulkVerifyCourses()">
-                                        Verificar Cursos (Todos)
-                                    </button>
-                                    <button class="btn btn-success" onclick="academicManager.bulkCreateCourses()">
-                                        Crear Cursos (Todos)
-                                    </button>
-                                    <button class="btn btn-success" onclick="academicManager.bulkCreateUsers()">
-                                        Crear Usuarios (Todos)
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div id="form-container"></div>
-                </div>
-
-                <!-- Vista de acciones masivas -->
-                <div id="bulk-view" class="view">
-                    <div id="bulk-actions-container">
-                        <div class="card">
-                            <div class="card-header">
-                                <h3>Acciones Concurrentes Masivas</h3>
-                            </div>
-                            <div class="concurrent-actions">
-                                <button class="btn btn-warning btn-lg" onclick="academicManager.startBulkVerification()">
-                                    ⚡ Verificar Todos los Cursos
-                                </button>
-                                <button class="btn btn-success btn-lg" onclick="academicManager.startBulkCreation()">
-                                    🚀 Crear Todos los Cursos
-                                </button>
-                                <button class="btn btn-primary btn-lg" onclick="academicManager.startBulkEnrollment()">
-                                    👥 Matricular Todos los Estudiantes
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                    <div id="results-container"></div>
-                </div>
-            </div>
-        `;
+  async initializeUIRenderer() {
+    if (typeof UIRenderer !== "undefined") {
+      this.uiRenderer = new UIRenderer(this.renderer, this.configManager);
+      console.log("UI Renderer cargado");
+    } else {
+      console.warn("UI Renderer no disponible, usando métodos básicos");
+    }
   }
 
-  setupNavigation() {
-    console.log("Configurando navegación...");
+  initializeRouter() {
+    if (typeof Router !== "undefined") {
+      this.router = new Router(this);
+      this.router.init();
+      console.log("Router cargado");
 
-    // Navegación entre vistas
-    document.getElementById("nav-main").addEventListener("click", (e) => {
-      e.preventDefault();
-      this.showView("main");
-    });
+      // Registrar handlers para acciones específicas
+      this.router.on("load-subjects", async (button) => {
+        const programId = document.getElementById("program-select")?.value;
+        const semester = document.getElementById("semester-select")?.value;
 
-    document.getElementById("nav-admin").addEventListener("click", (e) => {
-      e.preventDefault();
-      this.showView("admin");
-    });
+        if (programId && semester) {
+          const subjects = this.configManager.getSubjects(programId, semester);
+          const programName = this.configManager.getProgramName(programId);
 
-    document.getElementById("nav-bulk").addEventListener("click", (e) => {
-      e.preventDefault();
-      this.showView("bulk");
+          await this.renderSubjects({
+            subjects,
+            program_name: programName,
+            semester,
+          });
+        }
+      });
+    } else {
+      console.warn("Router no disponible, usando navegación básica");
+      this.setupBasicNavigation();
+    }
+  }
+
+  setupBasicNavigation() {
+    // Método simple de respaldo si no hay router
+    document.addEventListener("click", (e) => {
+      if (e.target.matches("#nav-main")) {
+        e.preventDefault();
+        this.showView("main");
+      } else if (e.target.matches("#nav-admin")) {
+        e.preventDefault();
+        this.showView("admin");
+      } else if (e.target.matches("#nav-bulk")) {
+        e.preventDefault();
+        this.showView("bulk");
+      }
     });
   }
 
-  setupEventListeners() {
-    console.log("Configurando event listeners...");
+  // ========== COORDINACIÓN DE RENDERIZADO ==========
+  async renderMainInterface() {
+    const templateData = {
+      userName: this.config.userName,
+      views: [
+        { id: "main", name: "Inicio" },
+        { id: "admin", name: "Administración" },
+        { id: "bulk", name: "Acciones Masivas" },
+      ],
+    };
 
-    // Los event listeners para selects se configurarán cuando se rendericen los templates
+    // Delegar al UI Renderer o usar Mustache directo
+    if (this.uiRenderer) {
+      await this.uiRenderer.renderMainInterface(templateData);
+    } else {
+      const rendered = this.renderer.render(
+        "main-interface",
+        templateData,
+        "academic-manager-app"
+      );
+      if (!rendered) {
+        console.error("No se pudo renderizar la interfaz principal");
+      }
+    }
   }
 
-  async loadInitialData() {
-    console.log("Cargando datos iniciales...");
+  async showView(viewName) {
+    this.currentView = viewName;
 
-    // Datos de ejemplo
-    const programs = [
-      { id: 1, nombre: "Ingeniería en Software" },
-      { id: 2, nombre: "Administración de Empresas" },
-      { id: 3, nombre: "Psicología Organizacional" },
-    ];
+    // Actualizar clases de vistas
+    this.updateViewClasses(viewName);
 
-    const semesters = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
-
-    this.renderer.renderSelection(programs, semesters);
+    // Delegar renderizado de contenido
+    if (this.uiRenderer) {
+      await this.uiRenderer.renderViewContent(viewName);
+    } else {
+      await this.renderViewContentBasic(viewName);
+    }
   }
 
-  showView(viewName) {
-    console.log("Mostrando vista:", viewName);
-
-    // Ocultar todas las vistas
+  updateViewClasses(viewName) {
     document.querySelectorAll(".view").forEach((view) => {
       view.classList.remove("active");
     });
 
-    // Mostrar vista seleccionada
-    document.getElementById(`${viewName}-view`).classList.add("active");
-
-    // Actualizar URL sin recargar la página
-    history.pushState({}, "", `?action=${viewName}`);
+    const targetView = document.getElementById(`${viewName}-view`);
+    if (targetView) {
+      targetView.classList.add("active");
+    }
   }
 
-  // ... el resto de los métodos igual que antes ...
+  async renderViewContentBasic(viewName) {
+    // Método básico si no hay UI Renderer
+    switch (viewName) {
+      case "main":
+        await this.renderMainViewBasic();
+        break;
+      case "admin":
+        this.renderer.render("admin-panel", {}, "admin-container");
+        break;
+      case "bulk":
+        this.renderer.render("bulk-actions", {}, "bulk-actions-container");
+        break;
+    }
+  }
+
+  async renderMainViewBasic() {
+    // Obtener datos del configManager
+    const programs = this.configManager.getPrograms();
+    const semesters = this.configManager.getSemesters();
+
+    this.renderer.renderSelection(programs, semesters);
+  }
+
+  // ========== MÉTODOS PÚBLICOS PARA OTROS MÓDULOS ==========
+  async renderForm(formType, data = {}) {
+    if (this.uiRenderer && this.uiRenderer.renderForm) {
+      await this.uiRenderer.renderForm(formType, data);
+    } else {
+      await this.renderFormBasic(formType, data);
+    }
+  }
+
+  async renderFormBasic(formType, data) {
+    switch (formType) {
+      case "program":
+        const programs = data.programs || this.configManager.getPrograms();
+        const semesters = data.semesters || this.configManager.getSemesters();
+        this.renderer.renderProgramForm(programs, semesters);
+        break;
+      case "subject":
+        this.renderer.renderSubjectForm(
+          data.programs || this.configManager.getPrograms(),
+          data.semesters || this.configManager.getSemesters()
+        );
+        break;
+      case "teacher":
+        const subjects = data.subjects || this.configManager.getSubjects();
+        this.renderer.renderTeacherForm(subjects);
+        break;
+    }
+  }
+
+  async renderSubjects(data = {}) {
+    if (this.uiRenderer && this.uiRenderer.renderSubjects) {
+      await this.uiRenderer.renderSubjects(data);
+    } else {
+      this.renderer.renderSubjects(
+        data.subjects || [],
+        data.program_name || "",
+        data.semester || ""
+      );
+    }
+  }
+
+  async renderResults(data = {}) {
+    if (this.uiRenderer && this.uiRenderer.renderResults) {
+      await this.uiRenderer.renderResults(data);
+    } else {
+      this.renderer.renderResults(data.operations || []);
+    }
+  }
+
+  // ========== MÉTODOS AUXILIARES ==========
+  hideForm() {
+    const container = document.getElementById("form-container");
+    if (container) {
+      container.innerHTML = "";
+    }
+  }
+
+  getCurrentView() {
+    return this.currentView;
+  }
+
+  getConfigManager() {
+    return this.configManager;
+  }
+
+  getRenderer() {
+    return this.renderer;
+  }
 }
 
-// Hacer academicManager global
+// Solo crear instancia - se inicializará cuando el DOM esté listo
 let academicManager;
 
-// Inicializar cuando el DOM esté listo
 document.addEventListener("DOMContentLoaded", async function () {
-  console.log("DOM cargado, inicializando Academic Manager...");
   academicManager = new AcademicManager();
   await academicManager.init();
-  console.log("Academic Manager inicializado correctamente");
 });

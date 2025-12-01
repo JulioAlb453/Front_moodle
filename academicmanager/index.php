@@ -9,11 +9,10 @@ $PAGE->set_heading('Academic Manager');
 
 echo $OUTPUT->header();
 
-// Determinar qué vista mostrar
 $action = optional_param('action', 'main', PARAM_TEXT);
 ?>
 
-<!-- Cargar CSS directamente -->
+<!-- Cargar CSS -->
 <link rel="stylesheet" href="<?php echo $CFG->wwwroot; ?>/local/academicmanager/styles/main.css">
 <link rel="stylesheet" href="<?php echo $CFG->wwwroot; ?>/local/academicmanager/styles/components/header.css">
 <link rel="stylesheet" href="<?php echo $CFG->wwwroot; ?>/local/academicmanager/styles/components/cards.css">
@@ -24,88 +23,80 @@ $action = optional_param('action', 'main', PARAM_TEXT);
 
 <style>
     /* Estilos básicos para las vistas */
-    .view { 
-        display: none; 
-        animation: fadeIn 0.3s ease-in;
-    }
-    .view.active { 
-        display: block; 
-    }
-    
-    .subjects-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-        gap: 1rem;
-        margin-top: 1rem;
-    }
-    
-    .subject-card {
-        background: white;
-        border-radius: 8px;
-        padding: 1rem;
-        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-        border-left: 4px solid #3498db;
-    }
-    
-    .subject-actions {
-        display: flex;
-        gap: 0.5rem;
-        margin-top: 1rem;
-    }
-    
-    .admin-actions {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-        gap: 1rem;
-        margin-top: 1rem;
-    }
-    
-    .action-group {
-        background: white;
-        padding: 1.5rem;
-        border-radius: 8px;
-        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-    }
-    
-    .concurrent-actions {
-        display: flex;
-        flex-direction: column;
-        gap: 1rem;
-        margin-top: 1rem;
-    }
-    
-    .btn-lg {
-        padding: 1rem 2rem;
-        font-size: 1.1rem;
-    }
-    
-    @keyframes fadeIn {
-        from { opacity: 0; transform: translateY(10px); }
-        to { opacity: 1; transform: translateY(0); }
-    }
+    .view { display: none; }
+    .view.active { display: block; }
 </style>
 
-<!-- Contenedor principal - VACÍO, se llenará con JavaScript -->
+<!-- Contenedor principal -->
 <div id="academic-manager-app">
-    <!-- La navegación y contenido se renderizarán dinámicamente -->
+    <!-- Cargando... -->
+    <div class="text-center py-5">
+        <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Cargando...</span>
+        </div>
+        <p class="mt-2">Cargando Academic Manager...</p>
+    </div>
 </div>
 
-<!-- Cargar JS directamente -->
-<script src="<?php echo $CFG->wwwroot; ?>/local/academicmanager/js/mustache.min.js"></script>
-<script src="<?php echo $CFG->wwwroot; ?>/local/academicmanager/js/mustache-renderer.js"></script>
-<script src="<?php echo $CFG->wwwroot; ?>/local/academicmanager/js/moodle-api.js"></script>
-<script src="<?php echo $CFG->wwwroot; ?>/local/academicmanager/js/concurrent-actions.js"></script>
-<script src="<?php echo $CFG->wwwroot; ?>/local/academicmanager/js/app.js"></script>
-
+<!-- 1. moodleData debe definirse ANTES de cualquier script -->
 <script>
-// Pasar datos de PHP a JavaScript
-const moodleData = {
+// moodleData debe estar disponible globalmente
+window.moodleData = {
     baseUrl: '<?php echo $CFG->wwwroot; ?>',
     sesskey: '<?php echo sesskey(); ?>',
     userId: <?php echo $USER->id; ?>,
-    userName: '<?php echo fullname($USER); ?>',
+    userName: '<?php echo addslashes(fullname($USER)); ?>',
     currentAction: '<?php echo $action; ?>'
 };
+console.log('moodleData definido:', window.moodleData);
+</script>
+
+<!-- 2. Cargar Mustache primero -->
+<script src="<?php echo $CFG->wwwroot; ?>/local/academicmanager/js/mustache.min.js"></script>
+
+<!-- 3. Cargar nuestros módulos en ORDEN -->
+<script src="<?php echo $CFG->wwwroot; ?>/local/academicmanager/js/config-manager.js"></script>
+<script src="<?php echo $CFG->wwwroot; ?>/local/academicmanager/js/mustache-renderer.js"></script>
+<script src="<?php echo $CFG->wwwroot; ?>/local/academicmanager/js/ui-renderer.js"></script>
+<script src="<?php echo $CFG->wwwroot; ?>/local/academicmanager/js/app.js"></script>
+
+<!-- 4. Punto de entrada principal -->
+<script>
+// Inicializar cuando TODO esté cargado
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('DOM cargado, verificando dependencias...');
+    
+    // Verificar que Mustache está cargado
+    if (typeof Mustache === 'undefined') {
+        console.error('Mustache.js no cargado');
+        return;
+    }
+    
+    // Verificar que moodleData está disponible
+    if (!window.moodleData) {
+        console.warn('moodleData no definido, usando valores por defecto');
+        window.moodleData = {
+            baseUrl: 'http://localhost/moodle',
+            sesskey: 'demo',
+            userId: 1,
+            userName: 'Usuario Demo',
+            currentAction: 'main'
+        };
+    }
+    
+    // Inicializar la aplicación
+    if (typeof AcademicManager !== 'undefined') {
+        console.log('Inicializando Academic Manager...');
+        window.academicManager = new AcademicManager();
+        window.academicManager.init().then(() => {
+            console.log('Academic Manager inicializado correctamente');
+        }).catch(error => {
+            console.error('Error inicializando Academic Manager:', error);
+        });
+    } else {
+        console.error('AcademicManager no está definido');
+    }
+});
 </script>
 
 <?php
