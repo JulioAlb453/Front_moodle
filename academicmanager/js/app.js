@@ -1,270 +1,224 @@
 class AcademicManager {
-  constructor() {
-    // Inicializar gestor de configuración
-    this.configManager = new ConfigManager();
-    this.config = this.configManager.init();
-
-    // Inicializar renderizador con configuración
-    this.renderer = new MustacheRenderer();
-    this.currentView = this.config.currentAction;
-
-    this.uiRenderer = null;
-    this.router = null;
-  }
-
-  async init() {
-    console.log("Academic Manager - Inicializando coordinador");
-
-    // 1. CARGAR TEMPLATES PRIMERO
-    console.log("Cargando templates Mustache...");
-    const templatesLoaded = await this.renderer.loadAllTemplates();
-
-    if (!templatesLoaded) {
-      console.error("Error crítico: No se pudieron cargar los templates");
-      // Podrías mostrar un error al usuario aquí
-      return;
+    constructor() {
+        this.currentView = 'main';
+        this.currentProgram = null;
+        this.currentSemester = null;
+        
+        // Inicializar componentes con tus archivos
+        this.configManager = new ConfigManager();
+        this.mustacheRenderer = new MustacheRenderer();
+        this.uiRenderer = new UIRenderer(this.mustacheRenderer, this.configManager);
+        this.router = new Router(this);
     }
 
-    console.log("Templates cargados exitosamente");
-
-    // 2. Inicializar UI Renderer (ahora con templates cargados)
-    await this.initializeUIRenderer();
-
-    // 3. Renderizar interfaz principal
-    await this.renderMainInterface();
-
-    this.initializeRouter();
-
-    // 4. Mostrar vista inicial
-    await this.showView(this.currentView);
-
-    console.log("Coordinador inicializado correctamente");
-  }
-
-  async initializeUIRenderer() {
-    if (typeof UIRenderer !== "undefined") {
-      this.uiRenderer = new UIRenderer(this.renderer, this.configManager);
-      console.log("UI Renderer cargado");
-    } else {
-      console.warn("UI Renderer no disponible, usando métodos básicos");
-    }
-  }
-
-  initializeRouter() {
-    if (typeof Router !== "undefined") {
-      this.router = new Router(this);
-      this.router.init();
-      console.log("Router cargado");
-
-      // Registrar handlers para acciones específicas
-      this.router.on("load-subjects", async (button) => {
-        const programId = document.getElementById("program-select")?.value;
-        const semester = document.getElementById("semester-select")?.value;
-
-        if (programId && semester) {
-          const subjects = this.configManager.getSubjects(programId, semester);
-          const programName = this.configManager.getProgramName(programId);
-
-          await this.renderSubjects({
-            subjects,
-            program_name: programName,
-            semester,
-          });
+    async init() {
+        console.log('🚀 Inicializando Academic Manager...');
+        
+        try {
+            // 1. Ocultar loading
+            this.hideLoading();
+            
+            // 2. Cargar templates (async)
+            await this.mustacheRenderer.loadAllTemplates();
+            
+            // 3. Cargar configuración
+            await this.configManager.loadConfig();
+            
+            // 4. Renderizar interfaz principal
+            await this.renderMainInterface();
+            
+            // 5. Inicializar router (usa tu archivo routes.js)
+            this.router.init();
+            
+            console.log('✅ Academic Manager inicializado');
+            
+        } catch (error) {
+            console.error('❌ Error en init:', error);
+            this.showError('Error inicializando: ' + error.message);
         }
-      });
-    } else {
-      console.warn("Router no disponible, usando navegación básica");
-      this.setupBasicNavigation();
     }
-  }
 
-  setupBasicNavigation() {
-    // Método simple de respaldo si no hay router
-    document.addEventListener("click", (e) => {
-      if (e.target.matches("#nav-main")) {
-        e.preventDefault();
-        this.showView("main");
-      } else if (e.target.matches("#nav-admin")) {
-        e.preventDefault();
-        this.showView("admin");
-      } else if (e.target.matches("#nav-bulk")) {
-        e.preventDefault();
-        this.showView("bulk");
-      }
-    });
-  }
-
-  // ========== COORDINACIÓN DE RENDERIZADO ==========
-  async renderMainInterface() {
-    const templateData = {
-      userName: this.config.userName,
-      views: [
-        { id: "main", name: "Inicio" },
-        { id: "admin", name: "Administración" },
-        { id: "bulk", name: "Acciones Masivas" },
-      ],
-    };
-
-    // Delegar al UI Renderer o usar Mustache directo
-    if (this.uiRenderer) {
-      await this.uiRenderer.renderMainInterface(templateData);
-    } else {
-      const rendered = this.renderer.render(
-        "main-interface",
-        templateData,
-        "academic-manager-app"
-      );
-      if (!rendered) {
-        console.error("No se pudo renderizar la interfaz principal");
-      }
+    async renderMainInterface() {
+        // Usa tu UIRenderer para renderizar la interfaz principal
+        const data = {
+            userName: moodleData.userName,
+            currentView: this.currentView
+        };
+        
+        await this.uiRenderer.renderMainInterface(data);
+        
+        // Configurar eventos básicos después de renderizar
+        this.setupEventListeners();
     }
-  }
 
-  async showView(viewName) {
-    this.currentView = viewName;
+    setupEventListeners() {
+        // Navegación por sidebar
+        document.addEventListener('click', (e) => {
+            if (e.target.closest('[data-view]')) {
+                const view = e.target.closest('[data-view]').getAttribute('data-view');
+                this.showView(view);
+                e.preventDefault();
+            }
+        });
 
-    // Actualizar clases de vistas
-    this.updateViewClasses(viewName);
+        // Selección de programa y cuatrimestre
+        document.addEventListener('change', (e) => {
+            if (e.target.id === 'program-select') {
+                this.currentProgram = e.target.value;
+                this.handleProgramChange();
+            }
+            if (e.target.id === 'semester-select') {
+                this.currentSemester = e.target.value;
+                this.handleSemesterChange();
+            }
+        });
 
-    // Delegar renderizado de contenido
-    if (this.uiRenderer) {
-      await this.uiRenderer.renderViewContent(viewName);
-    } else {
-      await this.renderViewContentBasic(viewName);
+        // Botón continuar
+        document.addEventListener('click', (e) => {
+            if (e.target.id === 'continue-selection') {
+                this.handleContinueSelection();
+            }
+        });
     }
-  }
 
-  async renderSubjectForm(data) {
-    const programs = data.programs || this.configManager.getPrograms();
-    const semesters = data.semesters || this.configManager.getSemesters();
-
-    const templateData = {
-        programs,
-        semesters
-    };
-
-    const rendered = this.renderer.render(
-        "subject-form",
-        templateData,
-        "form-container"
-    );
-
-    if (!rendered) {
-        this.renderSubjectFormFallback(templateData);
+    async showView(viewName) {
+        console.log(`Mostrando vista: ${viewName}`);
+        this.currentView = viewName;
+        
+        // Actualizar clases activas en menú
+        this.updateMenuActiveClass(viewName);
+        
+        // Ocultar todas las vistas
+        this.hideAllViews();
+        
+        // Mostrar vista solicitada
+        switch(viewName) {
+            case 'main':
+                await this.uiRenderer.renderMainView();
+                break;
+            case 'admin':
+                await this.uiRenderer.renderAdminView();
+                break;
+            case 'bulk':
+                await this.uiRenderer.renderBulkView();
+                break;
+            default:
+                console.warn(`Vista no reconocida: ${viewName}`);
+        }
     }
-}
 
-
-
-  
-  updateViewClasses(viewName) {
-    document.querySelectorAll(".view").forEach((view) => {
-      view.classList.remove("active");
-    });
-
-    const targetView = document.getElementById(`${viewName}-view`);
-    if (targetView) {
-      targetView.classList.add("active");
+    updateMenuActiveClass(viewName) {
+        // Remover clase active de todos
+        document.querySelectorAll('.menu-item').forEach(item => {
+            item.classList.remove('active');
+        });
+        
+        // Agregar clase active al correspondiente
+        const activeItem = document.querySelector(`[data-view="${viewName}"]`);
+        if (activeItem) {
+            activeItem.classList.add('active');
+        }
     }
-  }
 
-  async renderViewContentBasic(viewName) {
-    // Método básico si no hay UI Renderer
-    switch (viewName) {
-      case "main":
-        await this.renderMainViewBasic();
-        break;
-      case "admin":
-        this.renderer.render("admin-panel", {}, "admin-container");
-        break;
-      case "bulk":
-        this.renderer.render("bulk-actions", {}, "bulk-actions-container");
-        break;
+    hideAllViews() {
+        const views = ['main-view', 'admin-view', 'bulk-view'];
+        views.forEach(viewId => {
+            const view = document.getElementById(viewId);
+            if (view) {
+                view.style.display = 'none';
+            }
+        });
     }
-  }
 
-  async renderMainViewBasic() {
-    // Obtener datos del configManager
-    const programs = this.configManager.getPrograms();
-    const semesters = this.configManager.getSemesters();
-
-    this.renderer.renderSelection(programs, semesters);
-  }
-
-  // ========== MÉTODOS PÚBLICOS PARA OTROS MÓDULOS ==========
-  async renderForm(formType, data = {}) {
-    if (this.uiRenderer && this.uiRenderer.renderForm) {
-      await this.uiRenderer.renderForm(formType, data);
-    } else {
-      await this.renderFormBasic(formType, data);
+    async handleProgramChange() {
+        if (this.currentProgram && this.currentSemester) {
+            await this.loadAndRenderSubjects();
+        }
     }
-  }
 
-  async renderFormBasic(formType, data) {
-    switch (formType) {
-      case "program":
-        const programs = data.programs || this.configManager.getPrograms();
-        const semesters = data.semesters || this.configManager.getSemesters();
-        this.renderer.renderProgramForm(programs, semesters);
-        break;
-      case "subject":
-        this.renderer.renderSubjectForm(
-          data.programs || this.configManager.getPrograms(),
-          data.semesters || this.configManager.getSemesters()
+    async handleSemesterChange() {
+        if (this.currentProgram && this.currentSemester) {
+            await this.loadAndRenderSubjects();
+        }
+    }
+
+    async handleContinueSelection() {
+        const programSelect = document.getElementById('program-select');
+        const semesterSelect = document.getElementById('semester-select');
+        
+        if (!programSelect.value || !semesterSelect.value) {
+            alert('Por favor seleccione programa y cuatrimestre');
+            return;
+        }
+        
+        this.currentProgram = programSelect.value;
+        this.currentSemester = semesterSelect.value;
+        
+        await this.loadAndRenderSubjects();
+    }
+
+    async loadAndRenderSubjects() {
+        if (!this.currentProgram || !this.currentSemester) return;
+        
+        await this.uiRenderer.loadAndRenderSubjects(
+            this.currentProgram, 
+            this.currentSemester
         );
-        break;
-      case "teacher":
-        const subjects = data.subjects || this.configManager.getSubjects();
-        this.renderer.renderTeacherForm(subjects);
-        break;
     }
-  }
 
-  async renderSubjects(data = {}) {
-    if (this.uiRenderer && this.uiRenderer.renderSubjects) {
-      await this.uiRenderer.renderSubjects(data);
-    } else {
-      this.renderer.renderSubjects(
-        data.subjects || [],
-        data.program_name || "",
-        data.semester || ""
-      );
+    // Métodos que serán llamados por el router
+    async renderForm(formType) {
+        const data = {
+            programs: this.configManager.getPrograms(),
+            semesters: this.configManager.getSemesters()
+        };
+        
+        await this.uiRenderer.renderForm(formType, data);
+        
+        // Mostrar el formulario
+        document.getElementById('form-container').style.display = 'block';
     }
-  }
 
-  async renderResults(data = {}) {
-    if (this.uiRenderer && this.uiRenderer.renderResults) {
-      await this.uiRenderer.renderResults(data);
-    } else {
-      this.renderer.renderResults(data.operations || []);
+    hideForm() {
+        const formContainer = document.getElementById('form-container');
+        if (formContainer) {
+            formContainer.style.display = 'none';
+            formContainer.innerHTML = '';
+        }
     }
-  }
 
-  // ========== MÉTODOS AUXILIARES ==========
-  hideForm() {
-    const container = document.getElementById("form-container");
-    if (container) {
-      container.innerHTML = "";
+    async renderResults(data) {
+        await this.uiRenderer.renderResults(data);
     }
-  }
 
-  getCurrentView() {
-    return this.currentView;
-  }
+    hideLoading() {
+        const loading = document.getElementById('loading-message');
+        if (loading) {
+            loading.style.display = 'none';
+        }
+    }
 
-  getConfigManager() {
-    return this.configManager;
-  }
-
-  getRenderer() {
-    return this.renderer;
-  }
+    showError(message) {
+        const appContainer = document.getElementById('academic-manager-app');
+        if (appContainer) {
+            appContainer.innerHTML = `
+                <div class="error-container">
+                    <h3>❌ Error</h3>
+                    <p>${message}</p>
+                    <button class="btn btn-primary" onclick="location.reload()">Reintentar</button>
+                </div>
+            `;
+        }
+    }
 }
 
-// Solo crear instancia - se inicializará cuando el DOM esté listo
+// Inicialización global
 let academicManager;
 
-document.addEventListener("DOMContentLoaded", async function () {
-  academicManager = new AcademicManager();
-  await academicManager.init();
+document.addEventListener('DOMContentLoaded', function() {
+    academicManager = new AcademicManager();
+    academicManager.init();
+    
+    // Hacer disponible globalmente si es necesario
+    window.academicManager = academicManager;
 });

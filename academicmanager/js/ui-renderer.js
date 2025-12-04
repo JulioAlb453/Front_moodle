@@ -1,25 +1,45 @@
 class UIRenderer {
-    
-    constructor(mustacheRenderer, configManager) {
-        this.renderer = mustacheRenderer;
-        this.configManager = configManager;
-    }
-    // ========== RENDERIZADO DE INTERFAZ PRINCIPAL ==========
-    async renderMainInterface(templateData) {
-        // Intentar con Mustache primero
-        const rendered = this.renderer.render('main-interface', templateData, 'academic-manager-app');
-        
-        if (!rendered) {
-            // Fallback con HTML directo
-            this.renderMainInterfaceFallback(templateData);
-        }
-    }
+  constructor(mustacheRenderer, configManager) {
+    this.renderer = mustacheRenderer;
+    this.configManager = configManager;
+    this.currentView = "main";
+  }
 
-    renderMainInterfaceFallback(data) {
-        const appContainer = document.getElementById('academic-manager-app');
-        if (!appContainer) return;
+  setCurrentView(view) {
+    this.currentView = view;
+  }
 
-        appContainer.innerHTML = `
+  // ========== RENDERIZADO DE INTERFAZ PRINCIPAL ==========
+  async renderMainInterface(templateData) {
+    // Agregar flags de vista activa
+    const enhancedData = {
+      ...templateData,
+      isMainView: this.currentView === "main",
+      isAdminView: this.currentView === "admin",
+      isBulkView: this.currentView === "bulk",
+      activeMain: this.currentView === "main",
+      activeAdmin: this.currentView === "admin",
+      activeBulk: this.currentView === "bulk",
+    };
+
+    // Intentar con Mustache primero
+    const rendered = await this.renderer.render(
+      "main-interface",
+      enhancedData,
+      "academic-manager-app"
+    );
+
+    if (!rendered) {
+      console.warn("Usando fallback para main interface");
+      this.renderMainInterfaceFallback(enhancedData);
+    }
+  }
+
+  renderMainInterfaceFallback(data) {
+    const appContainer = document.getElementById("academic-manager-app");
+    if (!appContainer) return;
+
+    appContainer.innerHTML = `
             <nav class="header">
                 <div class="nav-bar">
                     <div class="logo">Academic Manager</div>
@@ -46,50 +66,52 @@ class UIRenderer {
                 </div>
             </div>
         `;
+  }
+
+  // ========== RENDERIZADO DE CONTENIDO DE VISTAS ==========
+  async renderViewContent(viewName) {
+    switch (viewName) {
+      case "main":
+        await this.renderMainView();
+        break;
+      case "admin":
+        await this.renderAdminView();
+        break;
+      case "bulk":
+        await this.renderBulkView();
+        break;
     }
+  }
 
-    // ========== RENDERIZADO DE CONTENIDO DE VISTAS ==========
-    async renderViewContent(viewName) {
-        switch(viewName) {
-            case 'main':
-                await this.renderMainView();
-                break;
-            case 'admin':
-                await this.renderAdminView();
-                break;
-            case 'bulk':
-                await this.renderBulkView();
-                break;
-        }
+  async renderMainView() {
+    const programs = this.configManager.getPrograms();
+    const semesters = this.configManager.getSemesters();
+
+    // Renderizar selección
+    const rendered = await this.renderer.renderSelection(programs, semesters);
+    if (!rendered) {
+      this.renderSelectionFallback(programs, semesters);
     }
+  }
+  async loadAndRenderSubjects(programId, semester) {
+    const subjects = this.configManager.getSubjects(programId, semester);
+    const programName = this.configManager.getProgramName(programId);
 
-    async renderMainView() {
-        const programs = this.configManager.getPrograms();
-        const semesters = this.configManager.getSemesters();
-        
-        const rendered = this.renderer.renderSelection(programs, semesters);
-        if (!rendered) {
-            this.renderSelectionFallback(programs, semesters);
-        }
+    const rendered = this.renderer.renderSubjects(
+      subjects,
+      programName,
+      semester
+    );
+    if (!rendered) {
+      this.renderSubjectsFallback(subjects, programName, semester);
     }
+  }
 
-    async loadAndRenderSubjects(programId, semester) {
-        const subjects = this.configManager.getSubjects(programId, semester);
-        const programName = this.configManager.getProgramName(programId);
-        
-        const rendered = this.renderer.renderSubjects(subjects, programName, semester);
-        if (!rendered) {
-            this.renderSubjectsFallback(subjects, programName, semester);
-        }
-    }
+  renderSelectionFallback(programs, semesters) {
+    const container = document.getElementById("selection-container");
+    if (!container) return;
 
-
-
-    renderSelectionFallback(programs, semesters) {
-        const container = document.getElementById('selection-container');
-        if (!container) return;
-
-        let html = `
+    let html = `
             <div class="card">
                 <div class="card-header">
                     <h3>Selección de Programa</h3>
@@ -99,11 +121,11 @@ class UIRenderer {
                     <select class="form-control" id="program-select">
                         <option value="">Seleccione un programa</option>`;
 
-        programs.forEach((program) => {
-            html += `<option value="${program.id}">${program.nombre}</option>`;
-        });
+    programs.forEach((program) => {
+      html += `<option value="${program.id}">${program.nombre}</option>`;
+    });
 
-        html += `</select>
+    html += `</select>
                 </div>
                 
                 <div class="form-group">
@@ -111,29 +133,29 @@ class UIRenderer {
                     <select class="form-control" id="semester-select">
                         <option value="">Seleccione cuatrimestre</option>`;
 
-        semesters.forEach((semester) => {
-            html += `<option value="${semester}">Cuatrimestre ${semester}</option>`;
-        });
+    semesters.forEach((semester) => {
+      html += `<option value="${semester}">Cuatrimestre ${semester}</option>`;
+    });
 
-        html += `</select>
+    html += `</select>
                 </div>
             </div>`;
 
-        container.innerHTML = html;
+    container.innerHTML = html;
+  }
+
+  async renderAdminView() {
+    const rendered = this.renderer.render("admin-panel", {}, "admin-container");
+    if (!rendered) {
+      this.renderAdminPanelFallback();
     }
+  }
 
-    async renderAdminView() {
-        const rendered = this.renderer.render('admin-panel', {}, 'admin-container');
-        if (!rendered) {
-            this.renderAdminPanelFallback();
-        }
-    }
+  renderAdminPanelFallback() {
+    const container = document.getElementById("admin-container");
+    if (!container) return;
 
-    renderAdminPanelFallback() {
-        const container = document.getElementById('admin-container');
-        if (!container) return;
-
-        container.innerHTML = `
+    container.innerHTML = `
             <div class="card">
                 <div class="card-header">
                     <h3>Panel de Administración</h3>
@@ -167,20 +189,24 @@ class UIRenderer {
                 </div>
             </div>
         `;
+  }
+
+  async renderBulkView() {
+    const rendered = this.renderer.render(
+      "bulk-actions",
+      {},
+      "bulk-actions-container"
+    );
+    if (!rendered) {
+      this.renderBulkActionsFallback();
     }
+  }
 
-    async renderBulkView() {
-        const rendered = this.renderer.render('bulk-actions', {}, 'bulk-actions-container');
-        if (!rendered) {
-            this.renderBulkActionsFallback();
-        }
-    }
+  renderBulkActionsFallback() {
+    const container = document.getElementById("bulk-actions-container");
+    if (!container) return;
 
-    renderBulkActionsFallback() {
-        const container = document.getElementById('bulk-actions-container');
-        if (!container) return;
-
-        container.innerHTML = `
+    container.innerHTML = `
             <div class="card">
                 <div class="card-header">
                     <h3>Acciones Concurrentes Masivas</h3>
@@ -198,44 +224,50 @@ class UIRenderer {
                 </div>
             </div>
         `;
-    }
+  }
 
-    // ========== RENDERIZADO DE FORMULARIOS ==========
-    async renderForm(formType, data = {}) {
-        switch(formType) {
-            case 'program':
-                await this.renderProgramForm(data);
-                break;
-            case 'subject':
-                await this.renderSubjectForm(data);
-                break;
-            case 'teacher':
-                await this.renderTeacherForm(data);
-                break;
-        }
+  // ========== RENDERIZADO DE FORMULARIOS ==========
+  async renderForm(formType, data = {}) {
+    switch (formType) {
+      case "program":
+        await this.renderProgramForm(data);
+        break;
+      case "subject":
+        await this.renderSubjectForm(data);
+        break;
+      case "teacher":
+        await this.renderTeacherForm(data);
+        break;
     }
+  }
 
-    async renderProgramForm(data) {
-        const rendered = this.renderer.renderProgramForm(data.programs || [], data.semesters || []);
-        if (!rendered) {
-            this.renderProgramFormFallback(data);
-        }
+  async renderProgramForm(data) {
+    const rendered = this.renderer.renderProgramForm(
+      data.programs || [],
+      data.semesters || []
+    );
+    if (!rendered) {
+      this.renderProgramFormFallback(data);
     }
+  }
 
-    async renderSubjectForm(data) {
-    const rendered = this.renderer.render('forms/subject-form', data, 'form-container');
+  async renderSubjectForm(data) {
+    const rendered = this.renderer.render(
+      "forms/subject-form",
+      data,
+      "form-container"
+    );
 
     if (!rendered) {
-        this.renderSubjectFormFallback(data);
+      this.renderSubjectFormFallback(data);
     }
-}
+  }
 
+  renderProgramFormFallback(data) {
+    const container = document.getElementById("form-container");
+    if (!container) return;
 
-    renderProgramFormFallback(data) {
-        const container = document.getElementById('form-container');
-        if (!container) return;
-
-        container.innerHTML = `
+    container.innerHTML = `
             <div class="card">
                 <div class="card-header">
                     <h3>Crear Programa de Estudio</h3>
@@ -254,10 +286,10 @@ class UIRenderer {
                 </form>
             </div>
         `;
-    }
+  }
 
-    renderSubjectFormFallback(data) {
-    const container = document.getElementById('form-container');
+  renderSubjectFormFallback(data) {
+    const container = document.getElementById("form-container");
     if (!container) return;
 
     let html = `
@@ -277,8 +309,8 @@ class UIRenderer {
                     <select class="form-control" name="program_id" required>
                         <option value="">Seleccione programa</option>`;
 
-    data.programs.forEach(p => {
-        html += `<option value="${p.id}">${p.nombre}</option>`;
+    data.programs.forEach((p) => {
+      html += `<option value="${p.id}">${p.nombre}</option>`;
     });
 
     html += `
@@ -290,8 +322,8 @@ class UIRenderer {
                     <select class="form-control" name="semester" required>
                         <option value="">Seleccione cuatrimestre</option>`;
 
-    data.semesters.forEach(s => {
-        html += `<option value="${s}">${s}</option>`;
+    data.semesters.forEach((s) => {
+      html += `<option value="${s}">${s}</option>`;
     });
 
     html += `
@@ -304,43 +336,42 @@ class UIRenderer {
     `;
 
     container.innerHTML = html;
-}
+  }
 
+  // ... métodos similares para subject-form y teacher-form ...
 
-    // ... métodos similares para subject-form y teacher-form ...
-
-    // ========== RENDERIZADO DE RESULTADOS ==========
-    async renderResults(data) {
-        const rendered = this.renderer.renderResults(data.operations || []);
-        if (!rendered) {
-            this.renderResultsFallback(data);
-        }
+  // ========== RENDERIZADO DE RESULTADOS ==========
+  async renderResults(data) {
+    const rendered = this.renderer.renderResults(data.operations || []);
+    if (!rendered) {
+      this.renderResultsFallback(data);
     }
+  }
 
-    renderResultsFallback(data) {
-        const container = document.getElementById('results-container');
-        if (!container) return;
+  renderResultsFallback(data) {
+    const container = document.getElementById("results-container");
+    if (!container) return;
 
-        let html = `
+    let html = `
             <div class="card">
                 <div class="card-header">
                     <h3>Resultados de Operaciones</h3>
                 </div>
                 <div class="results-container">`;
 
-        if (data.operations && data.operations.length > 0) {
-            data.operations.forEach(op => {
-                html += `
+    if (data.operations && data.operations.length > 0) {
+      data.operations.forEach((op) => {
+        html += `
                     <div class="thread-status ${op.status}">
                         <div class="thread-info">
                             <strong>${op.operation}</strong>
                             <span class="thread-message">${op.message}</span>
                         </div>
                     </div>`;
-            });
-        }
-
-        html += `</div></div>`;
-        container.innerHTML = html;
+      });
     }
+
+    html += `</div></div>`;
+    container.innerHTML = html;
+  }
 }

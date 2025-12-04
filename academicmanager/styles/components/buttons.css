@@ -1,18 +1,109 @@
 .btn {
-    padding: 0.75rem 1.5rem;
+    display: inline-block;
+    padding: 10px 20px;
     border: none;
     border-radius: 4px;
-    font-size: 1rem;
+    font-size: 14px;
+    font-weight: 500;
     cursor: pointer;
     transition: all 0.3s;
+    text-align: center;
 }
 
-.btn-primary { background: var(--primary); color: white; }
-.btn-success { background: var(--success); color: white; }
-.btn-warning { background: var(--warning); color: white; }
-.btn-danger { background: var(--danger); color: white; }
+.btn-sm {
+    padding: 5px 10px;
+    font-size: 12px;
+}
 
-.btn:hover {
-    opacity: 0.9;
-    transform: translateY(-1px);
+.btn-lg {
+    padding: 15px 30px;
+    font-size: 16px;
+}
+
+.btn-block {
+    display: block;
+    width: 100%;
+}
+
+/* Botones principales */
+.btn-primary {
+    background: #3498db;
+    color: white;
+}
+
+.btn-primary:hover {
+    background: #2980b9;
+}
+
+.btn-success {
+    background: #27ae60;
+    color: white;
+}
+
+.btn-success:hover {
+    background: #219653;
+}
+
+.btn-warning {
+    background: #f39c12;
+    color: white;
+}
+
+.btn-warning:hover {
+    background: #e67e22;
+}
+
+.btn-danger {
+    background: #e74c3c;
+    color: white;
+}
+
+.btn-danger:hover {
+    background: #c0392b;
+}
+
+.btn-secondary {
+    background: #95a5a6;
+    color: white;
+}
+
+.btn-secondary:hover {
+    background: #7f8c8d;
+}
+
+/* Botones outline */
+.btn-outline-primary {
+    background: transparent;
+    border: 2px solid #3498db;
+    color: #3498db;
+}
+
+.btn-outline-primary:hover {
+    background: #3498db;
+    color: white;
+}
+
+/* Botones de acción */
+.btn-action {
+    background: #f8f9fa;
+    border: 1px solid #dee2e6;
+    color: #495057;
+    padding: 12px 25px;
+    text-align: left;
+    display: block;
+    width: 100%;
+    margin-bottom: 10px;
+    border-radius: 6px;
+}
+
+.btn-action:hover {
+    background: #e9ecef;
+    border-color: #adb5bd;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.btn-action i {
+    margin-right: 10px;
+    width: 20px;
 }

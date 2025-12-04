@@ -1,22 +1,86 @@
 .form-group {
-    margin-bottom: 1rem;
+    margin-bottom: 20px;
 }
 
 .form-label {
     display: block;
-    margin-bottom: 0.5rem;
-    font-weight: 600;
+    margin-bottom: 8px;
+    font-weight: 500;
+    color: #555;
 }
 
 .form-control {
     width: 100%;
-    padding: 0.75rem;
+    padding: 10px 15px;
     border: 1px solid #ddd;
     border-radius: 4px;
-    font-size: 1rem;
+    font-size: 14px;
+    transition: border 0.3s, box-shadow 0.3s;
 }
 
 .form-control:focus {
     outline: none;
-    border-color: var(--primary);
+    border-color: #3498db;
+    box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+}
+
+.form-control:disabled {
+    background: #f8f9fa;
+    cursor: not-allowed;
+}
+
+/* Checkboxes y radios */
+.form-check {
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.form-check-input {
+    margin-right: 10px;
+}
+
+.form-check-label {
+    cursor: pointer;
+}
+
+/* Input groups */
+.input-group {
+    display: flex;
+}
+
+.input-group .form-control {
+    flex: 1;
+    border-radius: 4px 0 0 4px;
+}
+
+.input-group .btn {
+    border-radius: 0 4px 4px 0;
+}
+
+/* Validación */
+.form-control.is-invalid {
+    border-color: #e74c3c;
+}
+
+.form-control.is-valid {
+    border-color: #27ae60;
+}
+
+.invalid-feedback {
+    color: #e74c3c;
+    font-size: 12px;
+    margin-top: 5px;
+}
+
+/* Select múltiple */
+.form-control[multiple] {
+    height: auto;
+    min-height: 100px;
+}
+
+/* Textarea */
+textarea.form-control {
+    min-height: 100px;
+    resize: vertical;
 }
