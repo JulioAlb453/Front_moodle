@@ -2,6 +2,12 @@
  * ConfigManager - Maneja configuración y datos de Moodle
  */
 
+
+/**
+ *ponte que cada vez que se haga un cambio primero hacer un git push a main
+ */
+
+
 class ConfigManager {
   constructor() {
     this.config = {
