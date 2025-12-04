@@ -1,54 +1,44 @@
 <div class="academic-manager">
     <header class="am-header">
-        <h1><i class="fa fa-graduation-cap"></i> Academic Manager</h1>
+        <h1>Academic Manager</h1>
         <div class="user-info">
             <span class="user-name">{{userName}}</span>
-            <a href="{{baseUrl}}/login/logout.php" class="btn-logout">
-                <i class="fa fa-sign-out"></i> Salir
-            </a>
         </div>
     </header>
 
     <div class="am-container">
-        <!-- Sidebar de navegación -->
         <nav class="am-sidebar">
             <ul class="am-menu">
                 <li>
-                    <a href="#" class="menu-item {{#activeMain}}active{{/activeMain}}" data-view="main">
-                        <i class="fa fa-home"></i> Inicio
+                    <a href="#" class="menu-item" data-view="main">
+                        Inicio
                     </a>
                 </li>
                 <li>
-                    <a href="#" class="menu-item {{#activeAdmin}}active{{/activeAdmin}}" data-view="admin">
-                        <i class="fa fa-cog"></i> Administración
+                    <a href="#" class="menu-item" data-view="admin">
+                        Administración
                     </a>
                 </li>
                 <li>
-                    <a href="#" class="menu-item {{#activeBulk}}active{{/activeBulk}}" data-view="bulk">
-                        <i class="fa fa-bolt"></i> Acciones Masivas
+                    <a href="#" class="menu-item" data-view="bulk">
+                        Acciones Masivas
                     </a>
                 </li>
             </ul>
         </nav>
 
-        <!-- Área de contenido principal -->
         <main class="am-main">
-            <!-- Vista Principal (selección) -->
-            <div id="main-view" class="view" style="display: {{#isMainView}}block{{/isMainView}}{{^isMainView}}none{{/isMainView}};">
+            <div id="main-view" class="view">
                 <div id="selection-container"></div>
-                <div id="subjects-container"></div>
             </div>
 
-            <!-- Vista Administración -->
-            <div id="admin-view" class="view" style="display: {{#isAdminView}}block{{/isAdminView}}{{^isAdminView}}none{{/isAdminView}};">
+            <div id="admin-view" class="view">
                 <div id="admin-container"></div>
                 <div id="form-container" style="display: none;"></div>
             </div>
 
-            <!-- Vista Acciones Masivas -->
-            <div id="bulk-view" class="view" style="display: {{#isBulkView}}block{{/isBulkView}}{{^isBulkView}}none{{/isBulkView}};">
+            <div id="bulk-view" class="view">
                 <div id="bulk-actions-container"></div>
-                <div id="results-container"></div>
             </div>
         </main>
     </div>

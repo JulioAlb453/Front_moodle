@@ -24,8 +24,12 @@ window.moodleData = {
 </script>
 
 <!-- Cargar versión simple -->
-<script src="<?php echo $CFG->wwwroot; ?>/local/academicmanager/js/app-simple.js"></script>
-
+<script src="<?php echo $CFG->wwwroot; ?>/local/academicmanager/js/mustache.min.js"></script>
+<script src="<?php echo $CFG->wwwroot; ?>/local/academicmanager/js/config-manager.js"></script>
+<script src="<?php echo $CFG->wwwroot; ?>/local/academicmanager/js/mustache-renderer.js"></script>
+<script src="<?php echo $CFG->wwwroot; ?>/local/academicmanager/js/ui-renderer.js"></script>
+<script src="<?php echo $CFG->wwwroot; ?>/local/academicmanager/js/routes.js"></script>
+<script src="<?php echo $CFG->wwwroot; ?>/local/academicmanager/js/app.js"></script>
 <script>
 // Inicializar después de cargar
 document.addEventListener('DOMContentLoaded', function() {
