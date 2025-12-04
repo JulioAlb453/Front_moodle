@@ -374,4 +374,153 @@ class UIRenderer {
     html += `</div></div>`;
     container.innerHTML = html;
   }
+  // ========== MÉTODOS PARA VISTAS SEPARADAS ==========
+
+  async renderMainView(programs, semesters) {
+    console.log("📋 Renderizando vista principal (solo selección)");
+
+    const rendered = await this.renderer.render(
+      "selection",
+      {
+        programs,
+        semesters,
+      },
+      "selection-container"
+    );
+
+    if (!rendered) {
+      this.renderSelectionFallback(programs, semesters);
+    }
+
+    // Limpiar contenedor de asignaturas cuando se muestra la selección
+    const subjectsContainer = document.getElementById("subjects-container");
+    if (subjectsContainer) {
+      subjectsContainer.innerHTML = "";
+    }
+  }
+
+  async renderAdminView() {
+    console.log("⚙️ Renderizando vista de administración");
+
+    const rendered = await this.renderer.render(
+      "admin-panel",
+      {},
+      "admin-container"
+    );
+    if (!rendered) {
+      this.renderAdminPanelFallback();
+    }
+  }
+
+  async renderBulkView() {
+    console.log("⚡ Renderizando vista de acciones masivas");
+
+    const rendered = await this.renderer.render(
+      "bulk-actions",
+      {},
+      "bulk-actions-container"
+    );
+    if (!rendered) {
+      this.renderBulkActionsFallback();
+    }
+  }
+
+  // Modificar el renderMainInterface para que solo cree la estructura
+  async renderMainInterface(templateData) {
+    const enhancedData = {
+      ...templateData,
+      // Datos para determinar qué vista mostrar
+      showMainView: this.currentView === "main",
+      showAdminView: this.currentView === "admin",
+      showBulkView: this.currentView === "bulk",
+    };
+
+    const rendered = await this.renderer.render(
+      "main-interface",
+      enhancedData,
+      "academic-manager-app"
+    );
+
+    if (!rendered) {
+      this.renderMainInterfaceFallback(enhancedData);
+    }
+
+    return rendered;
+  }
+
+  // Actualizar el fallback de main interface
+  renderMainInterfaceFallback(data) {
+    const appContainer = document.getElementById("academic-manager-app");
+    if (!appContainer) return;
+
+    appContainer.innerHTML = `
+        <div class="academic-manager">
+            <header class="am-header">
+                <h1><i class="fa fa-graduation-cap"></i> Academic Manager</h1>
+                <div class="user-info">
+                    <span class="user-name">${data.userName}</span>
+                    <a href="${
+                      data.baseUrl
+                    }/login/logout.php" class="btn-logout">
+                        <i class="fa fa-sign-out"></i> Salir
+                    </a>
+                </div>
+            </header>
+
+            <div class="am-container">
+                <nav class="am-sidebar">
+                    <ul class="am-menu">
+                        <li>
+                            <a href="#" class="menu-item ${
+                              data.currentView === "main" ? "active" : ""
+                            }" data-view="main">
+                                <i class="fa fa-home"></i> Inicio
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#" class="menu-item ${
+                              data.currentView === "admin" ? "active" : ""
+                            }" data-view="admin">
+                                <i class="fa fa-cog"></i> Administración
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#" class="menu-item ${
+                              data.currentView === "bulk" ? "active" : ""
+                            }" data-view="bulk">
+                                <i class="fa fa-bolt"></i> Acciones Masivas
+                            </a>
+                        </li>
+                    </ul>
+                </nav>
+
+                <main class="am-main">
+                    <!-- Vista Principal (se muestra solo cuando se selecciona) -->
+                    <div id="main-view" class="view" style="display: ${
+                      data.showMainView ? "block" : "none"
+                    }">
+                        <div id="selection-container"></div>
+                        <div id="subjects-container"></div>
+                    </div>
+
+                    <!-- Vista Administración (se muestra solo cuando se selecciona) -->
+                    <div id="admin-view" class="view" style="display: ${
+                      data.showAdminView ? "block" : "none"
+                    }">
+                        <div id="admin-container"></div>
+                        <div id="form-container" style="display: none;"></div>
+                    </div>
+
+                    <!-- Vista Acciones Masivas (se muestra solo cuando se selecciona) -->
+                    <div id="bulk-view" class="view" style="display: ${
+                      data.showBulkView ? "block" : "none"
+                    }">
+                        <div id="bulk-actions-container"></div>
+                        <div id="results-container"></div>
+                    </div>
+                </main>
+            </div>
+        </div>
+    `;
+  }
 }

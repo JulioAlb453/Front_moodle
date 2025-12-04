@@ -1,4 +1,3 @@
-// routes.js
 class Router {
     constructor(academicManager) {
         this.academicManager = academicManager;
@@ -6,9 +5,9 @@ class Router {
             'main': () => this.academicManager.showView('main'),
             'admin': () => this.academicManager.showView('admin'),
             'bulk': () => this.academicManager.showView('bulk'),
-            'form-program': () => this.academicManager.renderForm('program'),
-            'form-subject': () => this.academicManager.renderForm('subject'),
-            'form-teacher': () => this.academicManager.renderForm('teacher'),
+            'form-program': () => this.academicManager.showForm('program'),
+            'form-subject': () => this.academicManager.showForm('subject'),
+            'form-teacher': () => this.academicManager.showForm('teacher'),
             'cancel-form': () => this.academicManager.hideForm()
         };
         
@@ -16,7 +15,9 @@ class Router {
     }
 
     init() {
-        // Escuchar clicks en enlaces de navegación
+        console.log("✅ Router inicializado");
+        
+        // Escuchar clicks en enlaces de navegación (CORREGIDO)
         this.setupNavigation();
         
         // Escuchar clicks en botones de acción
@@ -25,26 +26,81 @@ class Router {
         // Manejar cambios en URL (hash routing opcional)
         this.setupHashRouting();
         
-        console.log("Router inicializado");
+        // Manejar selección de programa/semestre
+        this.setupSelectionHandlers();
     }
 
     setupNavigation() {
-        // Delegación de eventos para la navegación principal
+        // Delegación de eventos para la navegación del sidebar
         document.addEventListener('click', (e) => {
-            // Navegación principal
-            if (e.target.matches('#nav-main, [data-route="main"]')) {
+            // Navegación por sidebar
+            const menuItem = e.target.closest('[data-view]');
+            if (menuItem) {
                 e.preventDefault();
-                this.navigate('main');
-            }
-            else if (e.target.matches('#nav-admin, [data-route="admin"]')) {
-                e.preventDefault();
-                this.navigate('admin');
-            }
-            else if (e.target.matches('#nav-bulk, [data-route="bulk"]')) {
-                e.preventDefault();
-                this.navigate('bulk');
+                const view = menuItem.getAttribute('data-view');
+                this.navigate(view);
             }
         });
+    }
+
+    setupSelectionHandlers() {
+        // Manejar cambios en selects
+        document.addEventListener('change', (e) => {
+            if (e.target.id === 'program-select') {
+                this.handleProgramChange(e.target.value);
+            }
+            if (e.target.id === 'semester-select') {
+                this.handleSemesterChange(e.target.value);
+            }
+        });
+        
+        // Manejar botón continuar
+        document.addEventListener('click', (e) => {
+            if (e.target.id === 'continue-selection' || 
+                e.target.closest('#continue-selection')) {
+                e.preventDefault();
+                this.handleContinueSelection();
+            }
+        });
+    }
+
+    handleProgramChange(programId) {
+        if (this.academicManager.handleProgramChange) {
+            this.academicManager.handleProgramChange(programId);
+        }
+    }
+
+    handleSemesterChange(semester) {
+        if (this.academicManager.handleSemesterChange) {
+            this.academicManager.handleSemesterChange(semester);
+        }
+    }
+
+    async handleContinueSelection() {
+        const programSelect = document.getElementById('program-select');
+        const semesterSelect = document.getElementById('semester-select');
+        
+        if (!programSelect || !semesterSelect) {
+            console.warn('Selects no encontrados');
+            return;
+        }
+        
+        const programId = programSelect.value;
+        const semester = semesterSelect.value;
+        
+        if (!programId || !semester) {
+            alert('Por favor seleccione programa y cuatrimestre');
+            return;
+        }
+        
+        console.log(`📋 Continuar con: programa ${programId}, semestre ${semester}`);
+        
+        // Guardar selección en academicManager
+        this.academicManager.selectedProgram = programId;
+        this.academicManager.selectedSemester = semester;
+        
+        // Cargar asignaturas
+        await this.academicManager.loadAndRenderSubjects();
     }
 
     setupActionButtons() {
@@ -59,17 +115,16 @@ class Router {
 
         // Manejar envío de formularios
         document.addEventListener('submit', (e) => {
+            e.preventDefault();
             const form = e.target;
+            
             if (form.id === 'program-form') {
-                e.preventDefault();
                 this.handleProgramFormSubmit(form);
             }
             else if (form.id === 'subject-form') {
-                e.preventDefault();
                 this.handleSubjectFormSubmit(form);
             }
             else if (form.id === 'teacher-form') {
-                e.preventDefault();
                 this.handleTeacherFormSubmit(form);
             }
         });
@@ -92,7 +147,7 @@ class Router {
     }
 
     navigate(route, params = {}) {
-        console.log(`Navegando a: ${route}`, params);
+        console.log(`🔄 Navegando a: ${route}`, params);
         
         if (this.routes[route]) {
             this.routes[route](params);
@@ -106,25 +161,25 @@ class Router {
             return true;
         }
         
-        console.warn(`Ruta no encontrada: ${route}`);
+        console.warn(`❌ Ruta no encontrada: ${route}`);
         return false;
     }
 
     updateActiveNav(route) {
-        // Remover clase active de todos los enlaces
-        document.querySelectorAll('.nav-links a').forEach(link => {
-            link.classList.remove('active');
+        // Remover clase active de todos los items del menú
+        document.querySelectorAll('.menu-item').forEach(item => {
+            item.classList.remove('active');
         });
         
-        // Agregar clase active al enlace correspondiente
-        const activeLink = document.querySelector(`#nav-${route}`);
-        if (activeLink) {
-            activeLink.classList.add('active');
+        // Agregar clase active al item correspondiente
+        const activeItem = document.querySelector(`[data-view="${route}"]`);
+        if (activeItem) {
+            activeItem.classList.add('active');
         }
     }
 
     handleAction(action, element) {
-        console.log(`Acción detectada: ${action}`, element);
+        console.log(`🎯 Acción detectada: ${action}`, element);
         
         // Acciones de navegación
         if (action === 'show-program-form') {
@@ -163,7 +218,7 @@ class Router {
             this.actionHandlers[action](element);
         }
         else {
-            console.warn(`Acción no manejada: ${action}`);
+            console.warn(`⚠️ Acción no manejada: ${action}`);
         }
     }
 
@@ -177,7 +232,7 @@ class Router {
         const formData = new FormData(form);
         const data = Object.fromEntries(formData.entries());
         
-        console.log('Enviando formulario de programa:', data);
+        console.log('📝 Enviando formulario de programa:', data);
         
         // Aquí llamarías a la API de Moodle
         // const result = await this.academicManager.moodleApi.createProgram(data);
@@ -191,7 +246,7 @@ class Router {
         const formData = new FormData(form);
         const data = Object.fromEntries(formData.entries());
         
-        console.log('Enviando formulario de asignatura:', data);
+        console.log('📝 Enviando formulario de asignatura:', data);
         alert('Asignatura creada (simulación)');
         this.navigate('cancel-form');
     }
@@ -200,13 +255,13 @@ class Router {
         const formData = new FormData(form);
         const data = Object.fromEntries(formData.entries());
         
-        console.log('Enviando formulario de docente:', data);
+        console.log('📝 Enviando formulario de docente:', data);
         alert('Docente creado (simulación)');
         this.navigate('cancel-form');
     }
 
     async handleBulkAction(actionType) {
-        console.log(`Iniciando acción masiva: ${actionType}`);
+        console.log(`⚡ Iniciando acción masiva: ${actionType}`);
         
         // Mostrar indicador de carga
         const resultsContainer = document.getElementById('results-container');
@@ -216,9 +271,11 @@ class Router {
                     <div class="card-header">
                         <h3>Ejecutando acción masiva...</h3>
                     </div>
-                    <div class="loading-spinner">
-                        <div class="spinner"></div>
-                        <p>Procesando, por favor espere...</p>
+                    <div class="card-body">
+                        <div class="loading-spinner">
+                            <div class="spinner"></div>
+                            <p>Procesando, por favor espere...</p>
+                        </div>
                     </div>
                 </div>
             `;
@@ -238,7 +295,9 @@ class Router {
                 ]
             };
             
-            await this.academicManager.renderResults(mockResults);
+            if (this.academicManager.renderResults) {
+                await this.academicManager.renderResults(mockResults);
+            }
         }, 2000);
     }
 }

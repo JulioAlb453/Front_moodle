@@ -1,10 +1,10 @@
 class AcademicManager {
     constructor() {
         this.currentView = 'main';
-        this.currentProgram = null;
-        this.currentSemester = null;
+        this.selectedProgram = null;
+        this.selectedSemester = null;
         
-        // Inicializar componentes con tus archivos
+        // Inicializar componentes
         this.configManager = new ConfigManager();
         this.mustacheRenderer = new MustacheRenderer();
         this.uiRenderer = new UIRenderer(this.mustacheRenderer, this.configManager);
@@ -15,20 +15,23 @@ class AcademicManager {
         console.log('🚀 Inicializando Academic Manager...');
         
         try {
-            // 1. Ocultar loading
-            this.hideLoading();
+            // 1. Inicializar configManager
+            this.configManager.init();
             
-            // 2. Cargar templates (async)
+            // 2. Cargar templates
             await this.mustacheRenderer.loadAllTemplates();
             
-            // 3. Cargar configuración
-            await this.configManager.loadConfig();
-            
-            // 4. Renderizar interfaz principal
+            // 3. Renderizar interfaz principal
             await this.renderMainInterface();
             
-            // 5. Inicializar router (usa tu archivo routes.js)
+            // 4. Inicializar router
             this.router.init();
+            
+            // 5. Mostrar vista inicial
+            await this.showView('main');
+            
+            // 6. Ocultar loading
+            this.hideLoading();
             
             console.log('✅ Academic Manager inicializado');
             
@@ -39,90 +42,80 @@ class AcademicManager {
     }
 
     async renderMainInterface() {
-        // Usa tu UIRenderer para renderizar la interfaz principal
         const data = {
-            userName: moodleData.userName,
-            currentView: this.currentView
+            userName: this.configManager.config.userName,
+            baseUrl: this.configManager.config.baseUrl,
+            currentView: this.currentView,
+            activeMain: this.currentView === 'main',
+            activeAdmin: this.currentView === 'admin',
+            activeBulk: this.currentView === 'bulk'
         };
         
         await this.uiRenderer.renderMainInterface(data);
-        
-        // Configurar eventos básicos después de renderizar
-        this.setupEventListeners();
-    }
-
-    setupEventListeners() {
-        // Navegación por sidebar
-        document.addEventListener('click', (e) => {
-            if (e.target.closest('[data-view]')) {
-                const view = e.target.closest('[data-view]').getAttribute('data-view');
-                this.showView(view);
-                e.preventDefault();
-            }
-        });
-
-        // Selección de programa y cuatrimestre
-        document.addEventListener('change', (e) => {
-            if (e.target.id === 'program-select') {
-                this.currentProgram = e.target.value;
-                this.handleProgramChange();
-            }
-            if (e.target.id === 'semester-select') {
-                this.currentSemester = e.target.value;
-                this.handleSemesterChange();
-            }
-        });
-
-        // Botón continuar
-        document.addEventListener('click', (e) => {
-            if (e.target.id === 'continue-selection') {
-                this.handleContinueSelection();
-            }
-        });
     }
 
     async showView(viewName) {
-        console.log(`Mostrando vista: ${viewName}`);
+        console.log(`📱 Mostrando vista: ${viewName}`);
         this.currentView = viewName;
         
-        // Actualizar clases activas en menú
-        this.updateMenuActiveClass(viewName);
-        
-        // Ocultar todas las vistas
+        // Ocultar todas las vistas primero
         this.hideAllViews();
         
         // Mostrar vista solicitada
         switch(viewName) {
             case 'main':
-                await this.uiRenderer.renderMainView();
+                await this.renderMainView();
                 break;
             case 'admin':
-                await this.uiRenderer.renderAdminView();
+                await this.renderAdminView();
                 break;
             case 'bulk':
-                await this.uiRenderer.renderBulkView();
+                await this.renderBulkView();
                 break;
             default:
                 console.warn(`Vista no reconocida: ${viewName}`);
         }
+        
+        // Actualizar menú activo
+        this.updateActiveMenu();
     }
 
-    updateMenuActiveClass(viewName) {
-        // Remover clase active de todos
-        document.querySelectorAll('.menu-item').forEach(item => {
-            item.classList.remove('active');
-        });
+    async renderMainView() {
+        const programs = this.configManager.getPrograms();
+        const semesters = this.configManager.getSemesters();
         
-        // Agregar clase active al correspondiente
-        const activeItem = document.querySelector(`[data-view="${viewName}"]`);
-        if (activeItem) {
-            activeItem.classList.add('active');
+        await this.uiRenderer.renderMainView(programs, semesters);
+        
+        // Mostrar contenedor de vista main
+        const mainView = document.getElementById('main-view');
+        if (mainView) {
+            mainView.style.display = 'block';
+        }
+    }
+
+    async renderAdminView() {
+        await this.uiRenderer.renderAdminView();
+        
+        // Mostrar contenedor de vista admin
+        const adminView = document.getElementById('admin-view');
+        if (adminView) {
+            adminView.style.display = 'block';
+        }
+    }
+
+    async renderBulkView() {
+        await this.uiRenderer.renderBulkView();
+        
+        // Mostrar contenedor de vista bulk
+        const bulkView = document.getElementById('bulk-view');
+        if (bulkView) {
+            bulkView.style.display = 'block';
         }
     }
 
     hideAllViews() {
-        const views = ['main-view', 'admin-view', 'bulk-view'];
-        views.forEach(viewId => {
+        // Ocultar todas las vistas
+        ['main-view', 'admin-view', 'bulk-view'].forEach(viewId => {
             const view = document.getElementById(viewId);
             if (view) {
                 view.style.display = 'none';
@@ -130,44 +123,45 @@ class AcademicManager {
         });
     }
 
-    async handleProgramChange() {
-        if (this.currentProgram && this.currentSemester) {
+    updateActiveMenu() {
+        // Remover 'active' de todos los items
+        document.querySelectorAll('.menu-item').forEach(item => {
+            item.classList.remove('active');
+        });
+        
+        // Agregar 'active' al item correspondiente
+        const activeItem = document.querySelector(`[data-view="${this.currentView}"]`);
+        if (activeItem) {
+            activeItem.classList.add('active');
+        }
+    }
+
+    // Métodos para manejar selecciones
+    async handleProgramChange(programId) {
+        this.selectedProgram = programId;
+        if (this.selectedProgram && this.selectedSemester) {
             await this.loadAndRenderSubjects();
         }
     }
 
-    async handleSemesterChange() {
-        if (this.currentProgram && this.currentSemester) {
+    async handleSemesterChange(semester) {
+        this.selectedSemester = semester;
+        if (this.selectedProgram && this.selectedSemester) {
             await this.loadAndRenderSubjects();
         }
-    }
-
-    async handleContinueSelection() {
-        const programSelect = document.getElementById('program-select');
-        const semesterSelect = document.getElementById('semester-select');
-        
-        if (!programSelect.value || !semesterSelect.value) {
-            alert('Por favor seleccione programa y cuatrimestre');
-            return;
-        }
-        
-        this.currentProgram = programSelect.value;
-        this.currentSemester = semesterSelect.value;
-        
-        await this.loadAndRenderSubjects();
     }
 
     async loadAndRenderSubjects() {
-        if (!this.currentProgram || !this.currentSemester) return;
+        if (!this.selectedProgram || !this.selectedSemester) return;
         
-        await this.uiRenderer.loadAndRenderSubjects(
-            this.currentProgram, 
-            this.currentSemester
-        );
+        const programName = this.configManager.getProgramName(this.selectedProgram);
+        const subjects = this.configManager.getSubjects(this.selectedProgram, this.selectedSemester);
+        
+        await this.uiRenderer.loadAndRenderSubjects(subjects, programName, this.selectedSemester);
     }
 
-    // Métodos que serán llamados por el router
-    async renderForm(formType) {
+    // Métodos para formularios
+    async showForm(formType) {
         const data = {
             programs: this.configManager.getPrograms(),
             semesters: this.configManager.getSemesters()
@@ -175,8 +169,11 @@ class AcademicManager {
         
         await this.uiRenderer.renderForm(formType, data);
         
-        // Mostrar el formulario
-        document.getElementById('form-container').style.display = 'block';
+        // Mostrar contenedor de formulario
+        const formContainer = document.getElementById('form-container');
+        if (formContainer) {
+            formContainer.style.display = 'block';
+        }
     }
 
     hideForm() {
@@ -212,13 +209,8 @@ class AcademicManager {
     }
 }
 
-// Inicialización global
-let academicManager;
-
+// Inicialización
 document.addEventListener('DOMContentLoaded', function() {
-    academicManager = new AcademicManager();
-    academicManager.init();
-    
-    // Hacer disponible globalmente si es necesario
-    window.academicManager = academicManager;
+    window.academicManager = new AcademicManager();
+    window.academicManager.init();
 });
