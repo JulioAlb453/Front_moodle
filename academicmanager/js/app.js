@@ -134,6 +134,29 @@ class AcademicManager {
     }
   }
 
+  async renderSubjectForm(data) {
+    const programs = data.programs || this.configManager.getPrograms();
+    const semesters = data.semesters || this.configManager.getSemesters();
+
+    const templateData = {
+        programs,
+        semesters
+    };
+
+    const rendered = this.renderer.render(
+        "subject-form",
+        templateData,
+        "form-container"
+    );
+
+    if (!rendered) {
+        this.renderSubjectFormFallback(templateData);
+    }
+}
+
+
+
+  
   updateViewClasses(viewName) {
     document.querySelectorAll(".view").forEach((view) => {
       view.classList.remove("active");

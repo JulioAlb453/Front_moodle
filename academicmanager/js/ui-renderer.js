@@ -222,6 +222,15 @@ class UIRenderer {
         }
     }
 
+    async renderSubjectForm(data) {
+    const rendered = this.renderer.render('forms/subject-form', data, 'form-container');
+
+    if (!rendered) {
+        this.renderSubjectFormFallback(data);
+    }
+}
+
+
     renderProgramFormFallback(data) {
         const container = document.getElementById('form-container');
         if (!container) return;
@@ -246,6 +255,57 @@ class UIRenderer {
             </div>
         `;
     }
+
+    renderSubjectFormFallback(data) {
+    const container = document.getElementById('form-container');
+    if (!container) return;
+
+    let html = `
+        <div class="card">
+            <div class="card-header">
+                <h3>Crear Asignatura</h3>
+                <button class="btn btn-sm btn-secondary" data-action="cancel-form">Cancelar</button>
+            </div>
+            <form id="subject-form">
+                <div class="form-group">
+                    <label class="form-label">Nombre de la Asignatura</label>
+                    <input type="text" class="form-control" name="subject_name" required>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Programa</label>
+                    <select class="form-control" name="program_id" required>
+                        <option value="">Seleccione programa</option>`;
+
+    data.programs.forEach(p => {
+        html += `<option value="${p.id}">${p.nombre}</option>`;
+    });
+
+    html += `
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Cuatrimestre</label>
+                    <select class="form-control" name="semester" required>
+                        <option value="">Seleccione cuatrimestre</option>`;
+
+    data.semesters.forEach(s => {
+        html += `<option value="${s}">${s}</option>`;
+    });
+
+    html += `
+                    </select>
+                </div>
+
+                <button type="submit" class="btn btn-success">Crear Asignatura</button>
+            </form>
+        </div>
+    `;
+
+    container.innerHTML = html;
+}
+
 
     // ... métodos similares para subject-form y teacher-form ...
 
