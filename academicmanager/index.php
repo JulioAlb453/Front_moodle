@@ -11,10 +11,10 @@ $PAGE->set_heading('Academic Manager');
 $PAGE->requires->css('/local/academicmanager/styles/main.css');
 $PAGE->requires->css('/local/academicmanager/styles/concurrent.css');
 
-$PAGE->requires->css('/local/academicmanager/styles/components/button.css');
-$PAGE->requires->css('/local/academicmanager/styles/components/card.css');
-$PAGE->requires->css('/local/academicmanager/styles/components/form.css');
-$PAGE->requires->css('/local/academicmanager/styles/components/table.css');
+$PAGE->requires->css('/local/academicmanager/styles/components/buttons.css');
+$PAGE->requires->css('/local/academicmanager/styles/components/cards.css');
+$PAGE->requires->css('/local/academicmanager/styles/components/forms.css');
+$PAGE->requires->css('/local/academicmanager/styles/components/tables.css');
 $PAGE->requires->css('/local/academicmanager/styles/components/header.css');
 echo $OUTPUT->header();
 ?>
