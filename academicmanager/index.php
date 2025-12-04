@@ -7,7 +7,7 @@ $PAGE->set_context(context_system::instance());
 $PAGE->set_title('Academic Manager');
 $PAGE->set_heading('Academic Manager');
 
-// Cargar CSS - CORREGIDO
+// Cargar CSS - Mantén como estaba
 $PAGE->requires->css('/local/academicmanager/styles/main.css');
 $PAGE->requires->css('/local/academicmanager/styles/components/buttons.css');
 $PAGE->requires->css('/local/academicmanager/styles/components/cards.css');
@@ -28,8 +28,8 @@ window.moodleData = {
 };
 </script>
 
-<!-- Cargar Mustache.js primero -->
-<script src="<?php echo $CFG->wwwroot; ?>/local/academicmanager/js/mustache.min.js"></script>
+<!-- Cargar Mustache.js CORREGIDO - usa versión UMD -->
+<script src="https://unpkg.com/mustache@4.2.0/mustache.js"></script>
 
 <!-- Cargar tus archivos JavaScript -->
 <script src="<?php echo $CFG->wwwroot; ?>/local/academicmanager/js/config-manager.js"></script>
@@ -38,15 +38,16 @@ window.moodleData = {
 <script src="<?php echo $CFG->wwwroot; ?>/local/academicmanager/js/routes.js"></script>
 <script src="<?php echo $CFG->wwwroot; ?>/local/academicmanager/js/app.js"></script>
 
-<!-- Solo el contenedor principal - NO MÁS HTML -->
+<!-- Solo el contenedor principal -->
 <div id="academic-manager-app">
     <div id="loading-message">
         <div class="spinner"></div>
         <p>Cargando Academic Manager...</p>
     </div>
 </div>
+
 <style>
-/* ESTILOS TEMPORALES DE DIAGNÓSTICO */
+/* ESTILOS TEMPORALES DE DIAGNÓSTICO - MANTÉN ESTOS */
 #academic-manager-app * {
     box-sizing: border-box;
     font-family: Arial, sans-serif;
@@ -273,48 +274,51 @@ window.moodleData = {
     }
 }
 </style>
+
 <script>
-// Script de diagnóstico
-document.addEventListener('DOMContentLoaded', function() {
-    console.log('🔍 DIAGNÓSTICO INICIADO');
+// SOLO esta función para prevenir conflictos con RequireJS de Moodle
+(function() {
+    console.log('=== PREVENCIÓN CONFLICTO REQUIREJS ===');
     
-    // Verificar que los elementos existen
-    setTimeout(() => {
-        console.log('=== ELEMENTOS ENCONTRADOS ===');
-        console.log('Academic Manager App:', document.getElementById('academic-manager-app'));
-        console.log('Main View:', document.getElementById('main-view'));
-        console.log('Admin View:', document.getElementById('admin-view'));
-        console.log('Bulk View:', document.getElementById('bulk-view'));
-        console.log('Form Container:', document.getElementById('form-container'));
-        
-        // Verificar botones de acción
-        const actionButtons = document.querySelectorAll('[data-action]');
-        console.log(`Botones con data-action: ${actionButtons.length}`);
-        
-        actionButtons.forEach(btn => {
-            console.log(`  - ${btn.getAttribute('data-action')}:`, btn.textContent.trim());
-        });
-        
-        // Verificar que academicManager está disponible
-        console.log('Academic Manager disponible:', !!window.academicManager);
-        console.log('Router disponible:', !!window.academicManager?.router);
-        
-    }, 2000);
+    // Guardar define original de Moodle
+    var originalDefine = window.define;
+    var originalRequire = window.require;
     
-    // Interceptar clicks en botones para diagnóstico
-    document.addEventListener('click', function(e) {
-        const button = e.target.closest('button');
-        if (button && button.getAttribute('data-action')) {
-            console.log('🖱️ CLICK EN BOTÓN:', {
-                action: button.getAttribute('data-action'),
-                text: button.textContent.trim(),
-                class: button.className
-            });
+    // Deshabilitar temporalmente para cargar Mustache
+    window.define = null;
+    window.require = null;
+    
+    // Esperar a que Mustache se cargue
+    var checkMustache = setInterval(function() {
+        if (typeof Mustache !== 'undefined') {
+            clearInterval(checkMustache);
+            console.log('✅ Mustache.js cargado');
+            
+            // Restaurar define y require de Moodle
+            window.define = originalDefine;
+            window.require = originalRequire;
+            
+            // Verificar que tus scripts se cargaron
+            setTimeout(function() {
+                console.log('ConfigManager:', typeof ConfigManager !== 'undefined');
+                console.log('MustacheRenderer:', typeof MustacheRenderer !== 'undefined');
+                console.log('UIRenderer:', typeof UIRenderer !== 'undefined');
+                console.log('Router:', typeof Router !== 'undefined');
+                console.log('AcademicManager:', typeof AcademicManager !== 'undefined');
+                
+                // Si AcademicManager tiene método init, llamarlo
+                if (typeof AcademicManager !== 'undefined') {
+                    // La aplicación debería inicializarse automáticamente
+                    // Pero si necesitas forzarla:
+                    if (typeof window.academicManager === 'undefined') {
+                        window.academicManager = new AcademicManager();
+                    }
+                }
+            }, 1000);
         }
-    }, true); // Usar capture para ver todos los clicks
-});
+    }, 100);
+})();
 </script>
+
 <?php
-
-
 echo $OUTPUT->footer();
