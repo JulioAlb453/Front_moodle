@@ -10,6 +10,13 @@ $PAGE->set_heading('Academic Manager');
 // Cargar CSS
 $PAGE->requires->css('/local/academicmanager/styles/main.css');
 $PAGE->requires->css('/local/academicmanager/styles/concurrent.css');
+$PAGE->requires->css('/local/academicmanager/styles/components/buttons.css');
+$PAGE->requires->css('/local/academicmanager/styles/components/cards.css');
+$PAGE->requires->css('/local/academicmanager/styles/components/forms.css');
+$PAGE->requires->css('/local/academicmanager/styles/components/tables.css');
+$PAGE->requires->css('/local/academicmanager/styles/components/headers.css');
+
+
 
 $PAGE->requires->css('/local/academicmanager/styles/components/buttons.css');
 $PAGE->requires->css('/local/academicmanager/styles/components/cards.css');
