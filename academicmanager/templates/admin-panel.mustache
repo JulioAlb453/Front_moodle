@@ -2,32 +2,35 @@
     <div class="card-header">
         <h3>Panel de Administración</h3>
     </div>
-    
-    <div class="admin-actions">
-        <div class="action-group">
+    <div class="card-body">
+        <div class="actions-section">
             <h4>Acciones Individuales</h4>
-            <button class="btn btn-primary" onclick="showCreateProgramForm()">
-                Crear Programa
-            </button>
-            <button class="btn btn-primary" onclick="showCreateSubjectForm()">
-                Crear Asignatura
-            </button>
-            <button class="btn btn-primary" onclick="showCreateTeacherForm()">
-                Crear Docente
-            </button>
+            <div class="actions-grid">
+                <button class="btn-action" data-action="show-program-form">
+                    <i class="fa fa-plus-circle"></i> Crear Programa
+                </button>
+                <button class="btn-action" data-action="show-subject-form">
+                    <i class="fa fa-book"></i> Crear Asignatura
+                </button>
+                <button class="btn-action" data-action="show-teacher-form">
+                    <i class="fa fa-user-plus"></i> Crear Docente
+                </button>
+            </div>
         </div>
         
-        <div class="action-group">
-            <h4>Acciones Concurrentes</h4>
-            <button class="btn btn-warning" onclick="bulkVerifyCourses()">
-                Verificar Cursos (Todos)
-            </button>
-            <button class="btn btn-success" onclick="bulkCreateCourses()">
-                Crear Cursos (Todos)
-            </button>
-            <button class="btn btn-success" onclick="bulkCreateUsers()">
-                Crear Usuarios (Todos)
-            </button>
+        <div class="actions-section" style="margin-top: 30px;">
+            <h4>Acciones Masivas</h4>
+            <div class="actions-grid">
+                <button class="btn-action" data-action="bulk-verify">
+                    <i class="fa fa-check-circle"></i> Verificar Cursos (Todos)
+                </button>
+                <button class="btn-action" data-action="bulk-create-courses">
+                    <i class="fa fa-rocket"></i> Crear Cursos (Todos)
+                </button>
+                <button class="btn-action" data-action="bulk-create-users">
+                    <i class="fa fa-users"></i> Crear Usuarios (Todos)
+                </button>
+            </div>
         </div>
     </div>
 </div>

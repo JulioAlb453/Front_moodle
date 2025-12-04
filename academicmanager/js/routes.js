@@ -1,272 +1,265 @@
 class Router {
-    constructor(academicManager) {
-        this.academicManager = academicManager;
-        this.routes = {
-            'main': () => this.academicManager.showView('main'),
-            'admin': () => this.academicManager.showView('admin'),
-            'bulk': () => this.academicManager.showView('bulk'),
-            'form-program': () => this.academicManager.showForm('program'),
-            'form-subject': () => this.academicManager.showForm('subject'),
-            'form-teacher': () => this.academicManager.showForm('teacher'),
-            'cancel-form': () => this.academicManager.hideForm()
-        };
-        
-        this.actionHandlers = {};
+  constructor(academicManager) {
+    this.academicManager = academicManager;
+    this.routes = {
+      main: () => this.academicManager.showView("main"),
+      admin: () => this.academicManager.showView("admin"),
+      bulk: () => this.academicManager.showView("bulk"),
+      "form-program": () => this.academicManager.showForm("program"),
+      "form-subject": () => this.academicManager.showForm("subject"),
+      "form-teacher": () => this.academicManager.showForm("teacher"),
+      "cancel-form": () => this.academicManager.hideForm(),
+    };
+
+    this.actionHandlers = {};
+  }
+
+  init() {
+    console.log("✅ Router inicializado");
+
+    // Escuchar clicks en enlaces de navegación (CORREGIDO)
+    this.setupNavigation();
+
+    // Escuchar clicks en botones de acción
+    this.setupActionButtons();
+
+    // Manejar cambios en URL (hash routing opcional)
+    this.setupHashRouting();
+
+    // Manejar selección de programa/semestre
+    this.setupSelectionHandlers();
+  }
+
+  setupNavigation() {
+    // Delegación de eventos para la navegación del sidebar
+    document.addEventListener("click", (e) => {
+      // Navegación por sidebar
+      const menuItem = e.target.closest("[data-view]");
+      if (menuItem) {
+        e.preventDefault();
+        const view = menuItem.getAttribute("data-view");
+        this.navigate(view);
+      }
+    });
+  }
+
+  setupSelectionHandlers() {
+    // Manejar cambios en selects
+    document.addEventListener("change", (e) => {
+      if (e.target.id === "program-select") {
+        this.handleProgramChange(e.target.value);
+      }
+      if (e.target.id === "semester-select") {
+        this.handleSemesterChange(e.target.value);
+      }
+    });
+
+    // Manejar botón continuar
+    document.addEventListener("click", (e) => {
+      if (
+        e.target.id === "continue-selection" ||
+        e.target.closest("#continue-selection")
+      ) {
+        e.preventDefault();
+        this.handleContinueSelection();
+      }
+    });
+  }
+
+  handleProgramChange(programId) {
+    if (this.academicManager.handleProgramChange) {
+      this.academicManager.handleProgramChange(programId);
+    }
+  }
+
+  handleSemesterChange(semester) {
+    if (this.academicManager.handleSemesterChange) {
+      this.academicManager.handleSemesterChange(semester);
+    }
+  }
+
+  async handleContinueSelection() {
+    const programSelect = document.getElementById("program-select");
+    const semesterSelect = document.getElementById("semester-select");
+
+    if (!programSelect || !semesterSelect) {
+      console.warn("Selects no encontrados");
+      return;
     }
 
-    init() {
-        console.log("✅ Router inicializado");
-        
-        // Escuchar clicks en enlaces de navegación (CORREGIDO)
-        this.setupNavigation();
-        
-        // Escuchar clicks en botones de acción
-        this.setupActionButtons();
-        
-        // Manejar cambios en URL (hash routing opcional)
-        this.setupHashRouting();
-        
-        // Manejar selección de programa/semestre
-        this.setupSelectionHandlers();
+    const programId = programSelect.value;
+    const semester = semesterSelect.value;
+
+    if (!programId || !semester) {
+      alert("Por favor seleccione programa y cuatrimestre");
+      return;
     }
 
-    setupNavigation() {
-        // Delegación de eventos para la navegación del sidebar
-        document.addEventListener('click', (e) => {
-            // Navegación por sidebar
-            const menuItem = e.target.closest('[data-view]');
-            if (menuItem) {
-                e.preventDefault();
-                const view = menuItem.getAttribute('data-view');
-                this.navigate(view);
-            }
-        });
+    console.log(
+      `📋 Continuar con: programa ${programId}, semestre ${semester}`
+    );
+
+    // Guardar selección en academicManager
+    this.academicManager.selectedProgram = programId;
+    this.academicManager.selectedSemester = semester;
+
+    // Cargar asignaturas
+    await this.academicManager.loadAndRenderSubjects();
+  }
+
+  setupActionButtons() {
+    // Delegación de eventos para botones de acción
+    document.addEventListener("click", (e) => {
+      const button = e.target.closest("[data-action]");
+      if (!button) return;
+
+      const action = button.getAttribute("data-action");
+      this.handleAction(action, button);
+    });
+
+    // Manejar envío de formularios
+    document.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const form = e.target;
+
+      if (form.id === "program-form") {
+        this.handleProgramFormSubmit(form);
+      } else if (form.id === "subject-form") {
+        this.handleSubjectFormSubmit(form);
+      } else if (form.id === "teacher-form") {
+        this.handleTeacherFormSubmit(form);
+      }
+    });
+  }
+
+  setupHashRouting() {
+    // Manejar cambios en el hash de la URL
+    window.addEventListener("hashchange", () => {
+      const hash = window.location.hash.substring(1);
+      if (hash && this.routes[hash]) {
+        this.navigate(hash);
+      }
+    });
+
+    // Verificar hash inicial
+    const initialHash = window.location.hash.substring(1);
+    if (initialHash && this.routes[initialHash]) {
+      setTimeout(() => this.navigate(initialHash), 100);
+    }
+  }
+
+  navigate(route, params = {}) {
+    console.log(`🔄 Navegando a: ${route}`, params);
+
+    if (this.routes[route]) {
+      this.routes[route](params);
+
+      // Actualizar estado activo en navegación
+      this.updateActiveNav(route);
+
+      // Actualizar URL (opcional)
+      history.pushState({ route }, "", `#${route}`);
+
+      return true;
     }
 
-    setupSelectionHandlers() {
-        // Manejar cambios en selects
-        document.addEventListener('change', (e) => {
-            if (e.target.id === 'program-select') {
-                this.handleProgramChange(e.target.value);
-            }
-            if (e.target.id === 'semester-select') {
-                this.handleSemesterChange(e.target.value);
-            }
-        });
-        
-        // Manejar botón continuar
-        document.addEventListener('click', (e) => {
-            if (e.target.id === 'continue-selection' || 
-                e.target.closest('#continue-selection')) {
-                e.preventDefault();
-                this.handleContinueSelection();
-            }
-        });
+    console.warn(`❌ Ruta no encontrada: ${route}`);
+    return false;
+  }
+
+  updateActiveNav(route) {
+    // Remover clase active de todos los items del menú
+    document.querySelectorAll(".menu-item").forEach((item) => {
+      item.classList.remove("active");
+    });
+
+    // Agregar clase active al item correspondiente
+    const activeItem = document.querySelector(`[data-view="${route}"]`);
+    if (activeItem) {
+      activeItem.classList.add("active");
     }
+  }
 
-    handleProgramChange(programId) {
-        if (this.academicManager.handleProgramChange) {
-            this.academicManager.handleProgramChange(programId);
-        }
+  handleAction(action, element) {
+    console.log(`🎯 Acción detectada: ${action}`, element);
+
+    // Acciones de navegación
+    if (action === "show-program-form") {
+      this.navigate("form-program");
+    } else if (action === "show-subject-form") {
+      this.navigate("form-subject");
+    } else if (action === "show-teacher-form") {
+      this.navigate("form-teacher");
+    } else if (action === "cancel-form") {
+      this.navigate("cancel-form");
     }
-
-    handleSemesterChange(semester) {
-        if (this.academicManager.handleSemesterChange) {
-            this.academicManager.handleSemesterChange(semester);
-        }
+    // Acciones masivas
+    else if (action === "start-bulk-verification") {
+      this.handleBulkAction("verification");
+    } else if (action === "start-bulk-creation") {
+      this.handleBulkAction("creation");
+    } else if (action === "start-bulk-enrollment") {
+      this.handleBulkAction("enrollment");
+    } else if (action === "bulk-verify") {
+      this.handleBulkAction("verification");
+    } else if (action === "bulk-create-courses") {
+      this.handleBulkAction("creation");
+    } else if (action === "bulk-create-users") {
+      this.handleBulkAction("user-creation");
     }
-
-    async handleContinueSelection() {
-        const programSelect = document.getElementById('program-select');
-        const semesterSelect = document.getElementById('semester-select');
-        
-        if (!programSelect || !semesterSelect) {
-            console.warn('Selects no encontrados');
-            return;
-        }
-        
-        const programId = programSelect.value;
-        const semester = semesterSelect.value;
-        
-        if (!programId || !semester) {
-            alert('Por favor seleccione programa y cuatrimestre');
-            return;
-        }
-        
-        console.log(`📋 Continuar con: programa ${programId}, semestre ${semester}`);
-        
-        // Guardar selección en academicManager
-        this.academicManager.selectedProgram = programId;
-        this.academicManager.selectedSemester = semester;
-        
-        // Cargar asignaturas
-        await this.academicManager.loadAndRenderSubjects();
+    // Acciones personalizadas registradas
+    else if (this.actionHandlers[action]) {
+      this.actionHandlers[action](element);
+    } else {
+      console.warn(`⚠️ Acción no manejada: ${action}`);
     }
+  }
 
-    setupActionButtons() {
-        // Delegación de eventos para botones de acción
-        document.addEventListener('click', (e) => {
-            const button = e.target.closest('[data-action]');
-            if (!button) return;
+  // Registrar handlers personalizados
+  on(action, handler) {
+    this.actionHandlers[action] = handler;
+  }
 
-            const action = button.getAttribute('data-action');
-            this.handleAction(action, button);
-        });
+  // Handlers para formularios
+  async handleProgramFormSubmit(form) {
+    const formData = new FormData(form);
+    const data = Object.fromEntries(formData.entries());
 
-        // Manejar envío de formularios
-        document.addEventListener('submit', (e) => {
-            e.preventDefault();
-            const form = e.target;
-            
-            if (form.id === 'program-form') {
-                this.handleProgramFormSubmit(form);
-            }
-            else if (form.id === 'subject-form') {
-                this.handleSubjectFormSubmit(form);
-            }
-            else if (form.id === 'teacher-form') {
-                this.handleTeacherFormSubmit(form);
-            }
-        });
-    }
+    console.log("📝 Enviando formulario de programa:", data);
 
-    setupHashRouting() {
-        // Manejar cambios en el hash de la URL
-        window.addEventListener('hashchange', () => {
-            const hash = window.location.hash.substring(1);
-            if (hash && this.routes[hash]) {
-                this.navigate(hash);
-            }
-        });
+    // Aquí llamarías a la API de Moodle
+    // const result = await this.academicManager.moodleApi.createProgram(data);
 
-        // Verificar hash inicial
-        const initialHash = window.location.hash.substring(1);
-        if (initialHash && this.routes[initialHash]) {
-            setTimeout(() => this.navigate(initialHash), 100);
-        }
-    }
+    // Por ahora solo mostramos un mensaje
+    alert("Programa creado (simulación)");
+    this.navigate("cancel-form");
+  }
 
-    navigate(route, params = {}) {
-        console.log(`🔄 Navegando a: ${route}`, params);
-        
-        if (this.routes[route]) {
-            this.routes[route](params);
-            
-            // Actualizar estado activo en navegación
-            this.updateActiveNav(route);
-            
-            // Actualizar URL (opcional)
-            history.pushState({ route }, '', `#${route}`);
-            
-            return true;
-        }
-        
-        console.warn(`❌ Ruta no encontrada: ${route}`);
-        return false;
-    }
+  async handleSubjectFormSubmit(form) {
+    const formData = new FormData(form);
+    const data = Object.fromEntries(formData.entries());
 
-    updateActiveNav(route) {
-        // Remover clase active de todos los items del menú
-        document.querySelectorAll('.menu-item').forEach(item => {
-            item.classList.remove('active');
-        });
-        
-        // Agregar clase active al item correspondiente
-        const activeItem = document.querySelector(`[data-view="${route}"]`);
-        if (activeItem) {
-            activeItem.classList.add('active');
-        }
-    }
+    console.log("📝 Enviando formulario de asignatura:", data);
+    alert("Asignatura creada (simulación)");
+    this.navigate("cancel-form");
+  }
 
-    handleAction(action, element) {
-        console.log(`🎯 Acción detectada: ${action}`, element);
-        
-        // Acciones de navegación
-        if (action === 'show-program-form') {
-            this.navigate('form-program');
-        }
-        else if (action === 'show-subject-form') {
-            this.navigate('form-subject');
-        }
-        else if (action === 'show-teacher-form') {
-            this.navigate('form-teacher');
-        }
-        else if (action === 'cancel-form') {
-            this.navigate('cancel-form');
-        }
-        // Acciones masivas
-        else if (action === 'start-bulk-verification') {
-            this.handleBulkAction('verification');
-        }
-        else if (action === 'start-bulk-creation') {
-            this.handleBulkAction('creation');
-        }
-        else if (action === 'start-bulk-enrollment') {
-            this.handleBulkAction('enrollment');
-        }
-        else if (action === 'bulk-verify') {
-            this.handleBulkAction('verification');
-        }
-        else if (action === 'bulk-create-courses') {
-            this.handleBulkAction('creation');
-        }
-        else if (action === 'bulk-create-users') {
-            this.handleBulkAction('user-creation');
-        }
-        // Acciones personalizadas registradas
-        else if (this.actionHandlers[action]) {
-            this.actionHandlers[action](element);
-        }
-        else {
-            console.warn(`⚠️ Acción no manejada: ${action}`);
-        }
-    }
+  async handleTeacherFormSubmit(form) {
+    const formData = new FormData(form);
+    const data = Object.fromEntries(formData.entries());
 
-    // Registrar handlers personalizados
-    on(action, handler) {
-        this.actionHandlers[action] = handler;
-    }
+    console.log("📝 Enviando formulario de docente:", data);
+    alert("Docente creado (simulación)");
+    this.navigate("cancel-form");
+  }
 
-    // Handlers para formularios
-    async handleProgramFormSubmit(form) {
-        const formData = new FormData(form);
-        const data = Object.fromEntries(formData.entries());
-        
-        console.log('📝 Enviando formulario de programa:', data);
-        
-        // Aquí llamarías a la API de Moodle
-        // const result = await this.academicManager.moodleApi.createProgram(data);
-        
-        // Por ahora solo mostramos un mensaje
-        alert('Programa creado (simulación)');
-        this.navigate('cancel-form');
-    }
+  async handleBulkAction(actionType) {
+    console.log(`⚡ Iniciando acción masiva: ${actionType}`);
 
-    async handleSubjectFormSubmit(form) {
-        const formData = new FormData(form);
-        const data = Object.fromEntries(formData.entries());
-        
-        console.log('📝 Enviando formulario de asignatura:', data);
-        alert('Asignatura creada (simulación)');
-        this.navigate('cancel-form');
-    }
-
-    async handleTeacherFormSubmit(form) {
-        const formData = new FormData(form);
-        const data = Object.fromEntries(formData.entries());
-        
-        console.log('📝 Enviando formulario de docente:', data);
-        alert('Docente creado (simulación)');
-        this.navigate('cancel-form');
-    }
-
-    async handleBulkAction(actionType) {
-        console.log(`⚡ Iniciando acción masiva: ${actionType}`);
-        
-        // Mostrar indicador de carga
-        const resultsContainer = document.getElementById('results-container');
-        if (resultsContainer) {
-            resultsContainer.innerHTML = `
+    // Mostrar indicador de carga
+    const resultsContainer = document.getElementById("results-container");
+    if (resultsContainer) {
+      resultsContainer.innerHTML = `
                 <div class="card">
                     <div class="card-header">
                         <h3>Ejecutando acción masiva...</h3>
@@ -279,25 +272,33 @@ class Router {
                     </div>
                 </div>
             `;
-        }
-        
-        // Simular acción asíncrona
-        setTimeout(async () => {
-            // Aquí llamarías a concurrent-actions.js
-            // const results = await this.academicManager.bulkActions[actionType]();
-            
-            // Resultados simulados
-            const mockResults = {
-                operations: [
-                    { operation: 'Curso 1', status: 'success', message: 'Creado exitosamente' },
-                    { operation: 'Curso 2', status: 'success', message: 'Creado exitosamente' },
-                    { operation: 'Curso 3', status: 'warning', message: 'Ya existía' }
-                ]
-            };
-            
-            if (this.academicManager.renderResults) {
-                await this.academicManager.renderResults(mockResults);
-            }
-        }, 2000);
     }
+
+    // Simular acción asíncrona
+    setTimeout(async () => {
+      // Aquí llamarías a concurrent-actions.js
+      // const results = await this.academicManager.bulkActions[actionType]();
+
+      // Resultados simulados
+      const mockResults = {
+        operations: [
+          {
+            operation: "Curso 1",
+            status: "success",
+            message: "Creado exitosamente",
+          },
+          {
+            operation: "Curso 2",
+            status: "success",
+            message: "Creado exitosamente",
+          },
+          { operation: "Curso 3", status: "warning", message: "Ya existía" },
+        ],
+      };
+
+      if (this.academicManager.renderResults) {
+        await this.academicManager.renderResults(mockResults);
+      }
+    }, 2000);
+  }
 }

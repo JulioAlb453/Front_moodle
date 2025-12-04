@@ -161,10 +161,13 @@ class AcademicManager {
     }
 
     // Métodos para formularios
-    async showForm(formType) {
+        async showForm(formType) {
+        console.log(`📝 Mostrando formulario: ${formType}`);
+        
         const data = {
             programs: this.configManager.getPrograms(),
-            semesters: this.configManager.getSemesters()
+            semesters: this.configManager.getSemesters(),
+            subjects: this.configManager.getSubjects()
         };
         
         await this.uiRenderer.renderForm(formType, data);
@@ -175,6 +178,17 @@ class AcademicManager {
             formContainer.style.display = 'block';
         }
     }
+
+    hideForm() {
+        console.log('❌ Ocultando formulario');
+        
+        const formContainer = document.getElementById('form-container');
+        if (formContainer) {
+            formContainer.style.display = 'none';
+            formContainer.innerHTML = '';
+        }
+    }
+
 
     hideForm() {
         const formContainer = document.getElementById('form-container');
