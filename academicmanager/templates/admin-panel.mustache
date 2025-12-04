@@ -1,0 +1,33 @@
+<div class="card">
+    <div class="card-header">
+        <h3>Panel de Administración</h3>
+    </div>
+    
+    <div class="admin-actions">
+        <div class="action-group">
+            <h4>Acciones Individuales</h4>
+            <button class="btn btn-primary" onclick="showCreateProgramForm()">
+                Crear Programa
+            </button>
+            <button class="btn btn-primary" onclick="showCreateSubjectForm()">
+                Crear Asignatura
+            </button>
+            <button class="btn btn-primary" onclick="showCreateTeacherForm()">
+                Crear Docente
+            </button>
+        </div>
+        
+        <div class="action-group">
+            <h4>Acciones Concurrentes</h4>
+            <button class="btn btn-warning" onclick="bulkVerifyCourses()">
+                Verificar Cursos (Todos)
+            </button>
+            <button class="btn btn-success" onclick="bulkCreateCourses()">
+                Crear Cursos (Todos)
+            </button>
+            <button class="btn btn-success" onclick="bulkCreateUsers()">
+                Crear Usuarios (Todos)
+            </button>
+        </div>
+    </div>
+</div>
