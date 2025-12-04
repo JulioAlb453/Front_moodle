@@ -7,23 +7,6 @@ $PAGE->set_context(context_system::instance());
 $PAGE->set_title('Academic Manager');
 $PAGE->set_heading('Academic Manager');
 
-$PAGE->requires->js('/local/academicmanager/js/mustache.min.js');
-
-
-// Cargar CSS
-$PAGE->requires->css('/local/academicmanager/styles/main.css');
-$PAGE->requires->css('/local/academicmanager/styles/components/buttons.css');
-$PAGE->requires->css('/local/academicmanager/styles/components/cards.css');
-$PAGE->requires->css('/local/academicmanager/styles/components/forms.css');
-$PAGE->requires->css('/local/academicmanager/styles/components/tables.css');
-$PAGE->requires->css('/local/academicmanager/styles/components/header.css');
-
-$PAGE->requires->js_call_amd('local_academicmanager/config-manager', 'init');
-$PAGE->requires->js_call_amd('local_academicmanager/mustache-renderer', 'init');
-$PAGE->requires->js_call_amd('local_academicmanager/ui-renderer', 'init');
-$PAGE->requires->js_call_amd('local_academicmanager/routes', 'init');
-$PAGE->requires->js_call_amd('local_academicmanager/app', 'init');
-
 echo $OUTPUT->header();
 ?>
 
@@ -33,11 +16,11 @@ window.moodleData = {
     baseUrl: '<?php echo $CFG->wwwroot; ?>',
     sesskey: '<?php echo sesskey(); ?>',
     userId: <?php echo $USER->id; ?>,
-    userName: '<?php echo json_encode(fullname($USER)); ?>'
+    userName: <?php echo json_encode(fullname($USER)); ?>
 };
 </script>
 
-<!-- Solo el contenedor principal -->
+<!-- Contenedor principal -->
 <div id="academic-manager-app">
     <div id="loading-message">
         <div class="spinner"></div>
@@ -46,98 +29,126 @@ window.moodleData = {
 </div>
 
 <style>
-/* Mantén tus estilos actuales */
+/* Estilos básicos */
+#academic-manager-app * {
+    box-sizing: border-box;
+    font-family: Arial, sans-serif;
+}
+
+#loading-message {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 300px;
+    text-align: center;
+}
+
+.spinner {
+    width: 40px;
+    height: 40px;
+    border: 4px solid #f3f3f3;
+    border-top: 4px solid #3498db;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin-bottom: 15px;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
 </style>
 
 <script>
-// Función para cargar scripts de forma compatible con RequireJS
-function loadAcademicScript(src, isRequireJSModule = false) {
+console.log('=== ACADEMIC MANAGER - INICIALIZACIÓN ===');
+
+// RUTA BASE A TU PROYECTO EXTERNO
+// IMPORTANTE: Ajusta esta ruta según cómo se accede desde la web
+const BASE_PATH = 'http://18.205.97.225/Front_moodle/academicmanager/js/';
+// O si está en el mismo servidor:
+// const BASE_PATH = '/Front_moodle/academicmanager/js/';
+
+// Función simple para cargar scripts
+function loadScript(src) {
     return new Promise((resolve, reject) => {
-        if (isRequireJSModule && typeof require !== 'undefined') {
-            // Cargar como módulo RequireJS
-            require([src.replace(/\.js$/, '')], resolve, reject);
-        } else {
-            // Cargar como script normal
-            console.log(`📦 Cargando: ${src}`);
-            const script = document.createElement('script');
-            script.src = src;
-            
-            // IMPORTANTE: Deshabilitar detección automática de AMD
-            script.setAttribute('data-amd', '1');
-            
-            script.onload = () => {
-                console.log(`✅ Cargado: ${src}`);
-                resolve();
-            };
-            script.onerror = (error) => {
-                console.error(`❌ Error cargando ${src}:`, error);
-                reject(error);
-            };
-            document.head.appendChild(script);
-        }
+        console.log('📦 Cargando:', src);
+        const script = document.createElement('script');
+        script.src = src;
+        script.onload = () => {
+            console.log('✅ Cargado:', src);
+            resolve();
+        };
+        script.onerror = (error) => {
+            console.error('❌ Error:', src, error);
+            reject(error);
+        };
+        document.head.appendChild(script);
     });
 }
 
-// Cargar scripts en orden
-(async () => {
+// Inicializar todo
+async function initializeApp() {
     try {
-        // 1. Cargar Mustache.js de forma especial (no como módulo AMD)
-        console.log('📦 Cargando Mustache.js...');
-        await new Promise((resolve, reject) => {
-            // Crear script con configuración para evitar conflicto con RequireJS
-            const script = document.createElement('script');
-            script.src = '<?php echo $CFG->wwwroot; ?>/local/academicmanager/js/mustache.min.js';
-            
-            // Configurar para que no se detecte como módulo AMD
-            script.setAttribute('data-amd', '1');
-            script.setAttribute('data-nomodule', '1');
-            
-            // Guardar define original
-            const originalDefine = window.define;
-            window.define = null;
-            
-            script.onload = () => {
-                console.log('✅ Mustache.js cargado');
-                // Restaurar define después de cargar Mustache
-                window.define = originalDefine;
-                resolve();
-            };
-            
-            script.onerror = reject;
-            document.head.appendChild(script);
-        });
+        // 1. Cargar Mustache.js desde CDN (más confiable)
+        await loadScript('https://cdnjs.cloudflare.com/ajax/libs/mustache.js/4.2.0/mustache.min.js');
+        console.log('✅ Mustache.js disponible:', typeof Mustache !== 'undefined');
         
-        // 2. Cargar tus scripts (sin RequireJS)
+        // 2. Cargar tus scripts en orden
         const scripts = [
-            '<?php echo $CFG->wwwroot; ?>/local/academicmanager/js/config-manager.js',
-            '<?php echo $CFG->wwwroot; ?>/local/academicmanager/js/mustache-renderer.js',
-            '<?php echo $CFG->wwwroot; ?>/local/academicmanager/js/ui-renderer.js',
-            '<?php echo $CFG->wwwroot; ?>/local/academicmanager/js/routes.js',
-            '<?php echo $CFG->wwwroot; ?>/local/academicmanager/js/app.js'
+            'config-manager.js',
+            'mustache-renderer.js',
+            'ui-renderer.js',
+            'routes.js',
+            'app.js'
         ];
         
-        for (const src of scripts) {
-            await loadAcademicScript(src);
+        for (const script of scripts) {
+            await loadScript(BASE_PATH + script);
         }
         
-        console.log('🚀 Todos los scripts cargados');
+        console.log('✅ Todos los scripts cargados');
         
-        // Verificar que todo se cargó correctamente
-        setTimeout(() => {
-            if (typeof Mustache !== 'undefined') {
-                console.log('✅ Mustache disponible');
+        // 3. Verificar que todo esté disponible
+        const requiredClasses = ['ConfigManager', 'MustacheRenderer', 'UIRenderer', 'Router', 'AcademicManager'];
+        for (const className of requiredClasses) {
+            if (typeof window[className] === 'undefined') {
+                console.error('❌ Clase no disponible:', className);
+            } else {
+                console.log('✓', className, 'OK');
             }
-            if (typeof AcademicManager !== 'undefined') {
-                console.log('✅ AcademicManager disponible');
-            }
-        }, 100);
+        }
+        
+        // 4. La aplicación debería inicializarse automáticamente en app.js
+        // Si no, puedes forzar la inicialización:
+        if (typeof window.academicManager !== 'undefined' && 
+            typeof window.academicManager.init === 'function') {
+            window.academicManager.init();
+        }
+        
+        console.log('🎉 Academic Manager inicializado');
         
     } catch (error) {
-        console.error('❌ Error cargando scripts:', error);
+        console.error('❌ Error crítico:', error);
+        document.getElementById('loading-message').innerHTML = `
+            <div style="color: #d32f2f; padding: 20px; text-align: center;">
+                <h3>Error al cargar Academic Manager</h3>
+                <p>${error.message}</p>
+                <button onclick="location.reload()" style="margin-top: 20px; padding: 10px 20px; background: #1976d2; color: white; border: none; border-radius: 4px; cursor: pointer;">
+                    Recargar página
+                </button>
+            </div>
+        `;
     }
-})();
+}
+
+// Iniciar cuando el DOM esté listo
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initializeApp);
+} else {
+    initializeApp();
+}
 </script>
 
 <?php
 echo $OUTPUT->footer();
-?>
