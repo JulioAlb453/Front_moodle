@@ -1,0 +1,24 @@
+<div class="card">
+    <div class="card-header">
+        <h3>Selección de Programa</h3>
+    </div>
+    <div class="form-group">
+        <label class="form-label">Programa de Estudio</label>
+        <select class="form-control" id="program-select">
+            <option value="">Seleccione un programa</option>
+            {{#programs}}
+            <option value="{{id}}">{{nombre}}</option>
+            {{/programs}}
+        </select>
+    </div>
+    
+    <div class="form-group">
+        <label class="form-label">Cuatrimestre</label>
+        <select class="form-control" id="semester-select" disabled>
+            <option value="">Seleccione cuatrimestre</option>
+            {{#semesters}}
+            <option value="{{.}}">Cuatrimestre {{.}}</option>
+            {{/semesters}}
+        </select>
+    </div>
+</div>
