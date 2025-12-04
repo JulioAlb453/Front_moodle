@@ -13,7 +13,7 @@ $PAGE->requires->css('/local/academicmanager/styles/components/buttons.css');
 $PAGE->requires->css('/local/academicmanager/styles/components/cards.css');
 $PAGE->requires->css('/local/academicmanager/styles/components/forms.css');
 $PAGE->requires->css('/local/academicmanager/styles/components/tables.css');
-$PAGE->requires->css('/local/academicmanager/styles/components/headers.css');
+$PAGE->requires->css('/local/academicmanager/styles/components/header.css');
 
 echo $OUTPUT->header();
 ?>
