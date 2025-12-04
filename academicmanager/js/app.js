@@ -161,24 +161,43 @@ class AcademicManager {
     }
 
     // Métodos para formularios
-        async showForm(formType) {
-        console.log(`📝 Mostrando formulario: ${formType}`);
+ async showForm(formType) {
+    console.log(`📝 Mostrando formulario: ${formType}`);
+    
+    // Obtener datos del configManager
+    const data = {
+        programs: this.configManager.getPrograms(),
+        semesters: this.configManager.getSemesters(),
+        subjects: this.configManager.getSubjects()
+    };
+    
+    // Usar el uiRenderer para renderizar el formulario
+    await this.uiRenderer.renderForm(formType, data);
+    
+    // Mostrar el contenedor de formulario
+    const formContainer = document.getElementById('form-container');
+    if (formContainer) {
+        formContainer.style.display = 'block';
         
-        const data = {
-            programs: this.configManager.getPrograms(),
-            semesters: this.configManager.getSemesters(),
-            subjects: this.configManager.getSubjects()
-        };
+        // Hacer scroll al formulario
+        formContainer.scrollIntoView({ behavior: 'smooth' });
         
-        await this.uiRenderer.renderForm(formType, data);
-        
-        // Mostrar contenedor de formulario
-        const formContainer = document.getElementById('form-container');
-        if (formContainer) {
-            formContainer.style.display = 'block';
-        }
+        console.log('✅ Formulario mostrado');
+    } else {
+        console.error('❌ Contenedor de formulario no encontrado');
     }
+}
 
+// En el método hideForm
+hideForm() {
+    console.log('❌ Ocultando formulario');
+    
+    const formContainer = document.getElementById('form-container');
+    if (formContainer) {
+        formContainer.style.display = 'none';
+        formContainer.innerHTML = '';
+    }
+}
     hideForm() {
         console.log('❌ Ocultando formulario');
         
