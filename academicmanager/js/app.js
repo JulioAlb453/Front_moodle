@@ -364,22 +364,10 @@ function fixProblematicButtons() {
 setTimeout(fixProblematicButtons, 2000);
 
 // Inicialización
-// Depuración de clics
-document.addEventListener('click', function(e) {
-    const academicManagerApp = document.getElementById('academic-manager-app');
-    const isInApp = academicManagerApp && academicManagerApp.contains(e.target);
-    
-    if (isInApp) {
-        console.log('🎯 CLIC DENTRO DE ACADEMIC MANAGER:', {
-            target: e.target.tagName,
-            class: e.target.className,
-            id: e.target.id,
-            dataView: e.target.getAttribute('data-view'),
-            dataAction: e.target.getAttribute('data-action'),
-            path: e.composedPath().map(el => el.tagName).slice(0, 5)
-        });
-    }
-}, true); // true para fase de captura
+document.addEventListener("DOMContentLoaded", function () {
+  window.academicManager = new AcademicManager();
+  window.academicManager.init();
+});
 
 window.showCreateProgramForm = function () {
   console.log("📝 showCreateProgramForm llamado");
