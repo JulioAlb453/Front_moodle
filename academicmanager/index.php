@@ -63,26 +63,31 @@ window.moodleData = {
 <script>
 console.log('=== ACADEMIC MANAGER - INICIALIZACIÓN ===');
 
-// RUTA BASE A TU PROYECTO EXTERNO
-// IMPORTANTE: Ajusta esta ruta según cómo se accede desde la web
-const BASE_PATH = 'http://18.205.97.225/Front_moodle/academicmanager/js/';
-// O si está en el mismo servidor:
-// const BASE_PATH = '/Front_moodle/academicmanager/js/';
+// RUTA BASE - Ajusta según sea necesario
+// Opción A: Si está en el mismo servidor (probablemente esta)
+const BASE_PATH = '/local/academicmanager/js/';
 
-// Función simple para cargar scripts
-function loadScript(src) {
+// Opción B: Si está en tu home (necesita configuración especial)
+// const BASE_PATH = '/front_moodle/academicmanager/js/';
+
+// Función mejorada para cargar scripts
+function loadScript(src, type = 'text/javascript') {
     return new Promise((resolve, reject) => {
         console.log('📦 Cargando:', src);
         const script = document.createElement('script');
         script.src = src;
+        script.type = type;
+        
         script.onload = () => {
             console.log('✅ Cargado:', src);
             resolve();
         };
+        
         script.onerror = (error) => {
-            console.error('❌ Error:', src, error);
-            reject(error);
+            console.error('❌ Error cargando:', src, error);
+            reject(new Error(`Failed to load ${src}`));
         };
+        
         document.head.appendChild(script);
     });
 }
@@ -90,55 +95,81 @@ function loadScript(src) {
 // Inicializar todo
 async function initializeApp() {
     try {
-        // 1. Cargar Mustache.js desde CDN (más confiable)
-        await loadScript('https://cdnjs.cloudflare.com/ajax/libs/mustache.js/4.2.0/mustache.min.js');
-        console.log('✅ Mustache.js disponible:', typeof Mustache !== 'undefined');
+        // 1. Cargar Mustache.js - versión UMD (no módulo ES6)
+        await loadScript('https://unpkg.com/mustache@4.2.0/mustache.js');
+        // O usa esta URL alternativa:
+        // await loadScript('https://cdn.jsdelivr.net/npm/mustache@4.2.0/mustache.js');
         
-        // 2. Cargar tus scripts en orden
+        if (typeof Mustache === 'undefined') {
+            throw new Error('Mustache.js no se cargó correctamente');
+        }
+        console.log('✅ Mustache.js disponible');
+        
+        // 2. Cargar tus scripts
+        // PRIMERO: Verifica que los archivos existan en Moodle
+        // Copia tus archivos a: /var/www/html/moodle/local/academicmanager/js/
         const scripts = [
-            'config-manager.js',
-            'mustache-renderer.js',
-            'ui-renderer.js',
-            'routes.js',
-            'app.js'
+            BASE_PATH + 'config-manager.js',
+            BASE_PATH + 'mustache-renderer.js',
+            BASE_PATH + 'ui-renderer.js',
+            BASE_PATH + 'routes.js',
+            BASE_PATH + 'app.js'
         ];
         
-        for (const script of scripts) {
-            await loadScript(BASE_PATH + script);
+        for (const scriptUrl of scripts) {
+            await loadScript(scriptUrl);
         }
         
         console.log('✅ Todos los scripts cargados');
         
-        // 3. Verificar que todo esté disponible
-        const requiredClasses = ['ConfigManager', 'MustacheRenderer', 'UIRenderer', 'Router', 'AcademicManager'];
-        for (const className of requiredClasses) {
-            if (typeof window[className] === 'undefined') {
-                console.error('❌ Clase no disponible:', className);
-            } else {
-                console.log('✓', className, 'OK');
+        // 3. Inicializar la aplicación
+        // Opción A: Si usas el sistema antiguo con init() global
+        if (typeof initAcademicManager === 'function') {
+            initAcademicManager();
+        }
+        // Opción B: Si usas la clase AcademicManager
+        else if (typeof AcademicManager !== 'undefined') {
+            window.academicManager = new AcademicManager();
+            console.log('🎉 Academic Manager instanciado');
+        }
+        // Opción C: Si la inicialización es automática
+        else {
+            console.log('⚠️ Esperando inicialización automática...');
+        }
+        
+        // Ocultar mensaje de carga después de un tiempo
+        setTimeout(() => {
+            const loadingMsg = document.getElementById('loading-message');
+            if (loadingMsg) {
+                loadingMsg.style.display = 'none';
             }
-        }
-        
-        // 4. La aplicación debería inicializarse automáticamente en app.js
-        // Si no, puedes forzar la inicialización:
-        if (typeof window.academicManager !== 'undefined' && 
-            typeof window.academicManager.init === 'function') {
-            window.academicManager.init();
-        }
-        
-        console.log('🎉 Academic Manager inicializado');
+        }, 1000);
         
     } catch (error) {
-        console.error('❌ Error crítico:', error);
-        document.getElementById('loading-message').innerHTML = `
-            <div style="color: #d32f2f; padding: 20px; text-align: center;">
-                <h3>Error al cargar Academic Manager</h3>
-                <p>${error.message}</p>
-                <button onclick="location.reload()" style="margin-top: 20px; padding: 10px 20px; background: #1976d2; color: white; border: none; border-radius: 4px; cursor: pointer;">
-                    Recargar página
-                </button>
-            </div>
-        `;
+        console.error('❌ Error crítico:', error.message);
+        
+        // Mostrar error al usuario
+        const loadingMsg = document.getElementById('loading-message');
+        if (loadingMsg) {
+            loadingMsg.innerHTML = `
+                <div style="color: #d32f2f; padding: 20px; text-align: center; max-width: 600px; margin: 0 auto;">
+                    <h3>Error al cargar Academic Manager</h3>
+                    <p><strong>${error.message}</strong></p>
+                    <p style="font-size: 14px; margin-top: 20px;">
+                        Verifica que los archivos JavaScript estén en:<br>
+                        <code>/var/www/html/moodle/local/academicmanager/js/</code>
+                    </p>
+                    <div style="margin-top: 30px;">
+                        <button onclick="location.reload()" style="padding: 10px 20px; background: #1976d2; color: white; border: none; border-radius: 4px; cursor: pointer; margin: 5px;">
+                            Recargar página
+                        </button>
+                        <button onclick="initializeApp()" style="padding: 10px 20px; background: #388e3c; color: white; border: none; border-radius: 4px; cursor: pointer; margin: 5px;">
+                            Reintentar
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
     }
 }
 
