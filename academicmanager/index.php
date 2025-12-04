@@ -273,6 +273,47 @@ window.moodleData = {
     }
 }
 </style>
+<script>
+// Script de diagnóstico
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('🔍 DIAGNÓSTICO INICIADO');
+    
+    // Verificar que los elementos existen
+    setTimeout(() => {
+        console.log('=== ELEMENTOS ENCONTRADOS ===');
+        console.log('Academic Manager App:', document.getElementById('academic-manager-app'));
+        console.log('Main View:', document.getElementById('main-view'));
+        console.log('Admin View:', document.getElementById('admin-view'));
+        console.log('Bulk View:', document.getElementById('bulk-view'));
+        console.log('Form Container:', document.getElementById('form-container'));
+        
+        // Verificar botones de acción
+        const actionButtons = document.querySelectorAll('[data-action]');
+        console.log(`Botones con data-action: ${actionButtons.length}`);
+        
+        actionButtons.forEach(btn => {
+            console.log(`  - ${btn.getAttribute('data-action')}:`, btn.textContent.trim());
+        });
+        
+        // Verificar que academicManager está disponible
+        console.log('Academic Manager disponible:', !!window.academicManager);
+        console.log('Router disponible:', !!window.academicManager?.router);
+        
+    }, 2000);
+    
+    // Interceptar clicks en botones para diagnóstico
+    document.addEventListener('click', function(e) {
+        const button = e.target.closest('button');
+        if (button && button.getAttribute('data-action')) {
+            console.log('🖱️ CLICK EN BOTÓN:', {
+                action: button.getAttribute('data-action'),
+                text: button.textContent.trim(),
+                class: button.className
+            });
+        }
+    }, true); // Usar capture para ver todos los clicks
+});
+</script>
 <?php
 
 
