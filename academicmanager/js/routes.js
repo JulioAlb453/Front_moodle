@@ -49,35 +49,35 @@ init() {
     this.setupSelectionHandlers();
 }
 setupNavigation() {
-    console.log('🔧 Configurando navegación...');
+    console.log('🔧 Configurando navegación específica...');
     
-    // Delegación de eventos para la navegación del sidebar
+    // Delegación de eventos solo para elementos dentro de tu aplicación
     document.addEventListener('click', (e) => {
-        // Verificar si es un clic en el menú lateral
+        // Verificar si el clic ocurrió DENTRO de academic-manager-app
+        const isInAcademicManager = e.target.closest('#academic-manager-app');
+        
+        if (!isInAcademicManager) {
+            return; // Ignorar clics fuera de tu aplicación
+        }
+        
+        // Buscar elemento del menú
         const menuItem = e.target.closest('[data-view]');
         
-        if (menuItem) {
+        if (menuItem && menuItem.closest('.am-menu')) {
             e.preventDefault();
             e.stopPropagation();
+            e.stopImmediatePropagation(); // IMPORTANTE: Detener propagación
             
             const view = menuItem.getAttribute('data-view');
-            console.log(`📱 Clic en menú: ${view}`);
+            console.log(`📱 CLIC EN MENÚ ACADEMIC MANAGER: ${view}`);
             
             // Navegar a la vista
             this.navigate(view);
-            return;
+            return false;
         }
-        
-        // También verificar si es un clic en un enlace con data-route (backup)
-        if (e.target.matches('[data-route]')) {
-            e.preventDefault();
-            const route = e.target.getAttribute('data-route');
-            console.log(`📱 Clic en ruta: ${route}`);
-            this.navigate(route);
-        }
-    });
+    }, true); // Usar CAPTURE phase para atrapar el evento primero
     
-    console.log('✅ Navegación configurada');
+    console.log('✅ Navegación específica configurada');
 }
 
   setupSelectionHandlers() {
