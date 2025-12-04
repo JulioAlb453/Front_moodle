@@ -14,34 +14,71 @@ class Router {
     this.actionHandlers = {};
   }
 
-  init() {
+init() {
     console.log("✅ Router inicializado");
-
+    
+    // DEPURACIÓN: Verificar estructura del DOM
+    setTimeout(() => {
+        console.log('=== DEPURACIÓN DE NAVEGACIÓN ===');
+        const menuItems = document.querySelectorAll('[data-view]');
+        console.log(`Elementos con data-view encontrados: ${menuItems.length}`);
+        
+        menuItems.forEach((item, index) => {
+            console.log(`${index + 1}. data-view="${item.getAttribute('data-view')}"`);
+            console.log(`   Texto: ${item.textContent.trim()}`);
+            console.log(`   Clases: ${item.className}`);
+            
+            // Verificar que tiene event listener
+            item.style.border = '2px solid red';
+            setTimeout(() => {
+                item.style.border = '';
+            }, 2000);
+        });
+    }, 1000);
+    
     // Escuchar clicks en enlaces de navegación (CORREGIDO)
     this.setupNavigation();
-
+    
     // Escuchar clicks en botones de acción
     this.setupActionButtons();
-
+    
     // Manejar cambios en URL (hash routing opcional)
     this.setupHashRouting();
-
+    
     // Manejar selección de programa/semestre
     this.setupSelectionHandlers();
-  }
-
-  setupNavigation() {
+}
+setupNavigation() {
+    console.log('🔧 Configurando navegación...');
+    
     // Delegación de eventos para la navegación del sidebar
-    document.addEventListener("click", (e) => {
-      // Navegación por sidebar
-      const menuItem = e.target.closest("[data-view]");
-      if (menuItem) {
-        e.preventDefault();
-        const view = menuItem.getAttribute("data-view");
-        this.navigate(view);
-      }
+    document.addEventListener('click', (e) => {
+        // Verificar si es un clic en el menú lateral
+        const menuItem = e.target.closest('[data-view]');
+        
+        if (menuItem) {
+            e.preventDefault();
+            e.stopPropagation();
+            
+            const view = menuItem.getAttribute('data-view');
+            console.log(`📱 Clic en menú: ${view}`);
+            
+            // Navegar a la vista
+            this.navigate(view);
+            return;
+        }
+        
+        // También verificar si es un clic en un enlace con data-route (backup)
+        if (e.target.matches('[data-route]')) {
+            e.preventDefault();
+            const route = e.target.getAttribute('data-route');
+            console.log(`📱 Clic en ruta: ${route}`);
+            this.navigate(route);
+        }
     });
-  }
+    
+    console.log('✅ Navegación configurada');
+}
 
   setupSelectionHandlers() {
     // Manejar cambios en selects
@@ -150,22 +187,24 @@ class Router {
 
   navigate(route, params = {}) {
     console.log(`🔄 Navegando a: ${route}`, params);
-
+    
     if (this.routes[route]) {
-      this.routes[route](params);
-
-      // Actualizar estado activo en navegación
-      this.updateActiveNav(route);
-
-      // Actualizar URL (opcional)
-      history.pushState({ route }, "", `#${route}`);
-
-      return true;
+        console.log(`✅ Ruta encontrada, ejecutando...`);
+        this.routes[route](params);
+        
+        // Actualizar estado activo en navegación
+        this.updateActiveNav(route);
+        
+        // Actualizar URL (opcional)
+        history.pushState({ route }, '', `#${route}`);
+        
+        return true;
     }
-
-    console.warn(`❌ Ruta no encontrada: ${route}`);
+    
+    console.warn(`❌ Ruta no encontrada en routes: ${route}`);
+    console.log('Rutas disponibles:', Object.keys(this.routes));
     return false;
-  }
+}
 
   updateActiveNav(route) {
     // Remover clase active de todos los items del menú

@@ -44,6 +44,13 @@ window.moodleData = {
         <div class="spinner"></div>
         <p>Cargando Academic Manager...</p>
     </div>
+    <div style="position: fixed; bottom: 10px; right: 10px; z-index: 9999; background: white; padding: 10px; border: 2px solid #3498db; border-radius: 5px;">
+    <h4>Navegación de prueba:</h4>
+    <button onclick="window.academicManager.showView('main')" style="margin: 5px;">Vista Main</button>
+    <button onclick="window.academicManager.showView('admin')" style="margin: 5px;">Vista Admin</button>
+    <button onclick="window.academicManager.showView('bulk')" style="margin: 5px;">Vista Bulk</button>
+    <button onclick="window.academicManager.showForm('program')" style="margin: 5px;">Form Programa</button>
+</div>
 </div>
 <style>
 /* ESTILOS TEMPORALES DE DIAGNÓSTICO */

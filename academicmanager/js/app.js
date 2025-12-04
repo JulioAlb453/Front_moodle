@@ -41,44 +41,71 @@ class AcademicManager {
         }
     }
 
-    async renderMainInterface() {
-        const data = {
-            userName: this.configManager.config.userName,
-            baseUrl: this.configManager.config.baseUrl,
-            currentView: this.currentView,
-            activeMain: this.currentView === 'main',
-            activeAdmin: this.currentView === 'admin',
-            activeBulk: this.currentView === 'bulk'
-        };
+   // En app.js, después de renderMainInterface
+async renderMainInterface() {
+    const data = {
+        userName: this.configManager.config.userName,
+        baseUrl: this.configManager.config.baseUrl,
+        currentView: this.currentView,
+        activeMain: this.currentView === 'main',
+        activeAdmin: this.currentView === 'admin',
+        activeBulk: this.currentView === 'bulk'
+    };
+    
+    console.log('🎨 Renderizando interfaz principal con datos:', data);
+    
+    await this.uiRenderer.renderMainInterface(data);
+    
+    // Verificar HTML generado
+    setTimeout(() => {
+        const appContainer = document.getElementById('academic-manager-app');
+        console.log('📄 HTML generado (primeros 1000 caracteres):');
+        console.log(appContainer.innerHTML.substring(0, 1000));
         
-        await this.uiRenderer.renderMainInterface(data);
-    }
-
+        // Verificar elementos del menú
+        const menuItems = appContainer.querySelectorAll('[data-view]');
+        console.log(`🔗 Elementos del menú encontrados: ${menuItems.length}`);
+        
+        menuItems.forEach(item => {
+            console.log(`   - data-view="${item.getAttribute('data-view')}"`);
+            console.log(`     Clases: "${item.className}"`);
+            console.log(`     HTML: ${item.outerHTML.substring(0, 150)}`);
+        });
+    }, 500);
+}
     async showView(viewName) {
-        console.log(`📱 Mostrando vista: ${viewName}`);
-        this.currentView = viewName;
-        
-        // Ocultar todas las vistas primero
-        this.hideAllViews();
-        
-        // Mostrar vista solicitada
-        switch(viewName) {
-            case 'main':
-                await this.renderMainView();
-                break;
-            case 'admin':
-                await this.renderAdminView();
-                break;
-            case 'bulk':
-                await this.renderBulkView();
-                break;
-            default:
-                console.warn(`Vista no reconocida: ${viewName}`);
-        }
-        
-        // Actualizar menú activo
-        this.updateActiveMenu();
+    console.log(`📱 ACADEMIC MANAGER: Mostrando vista: ${viewName}`);
+    console.log(`   ConfigManager disponible: ${!!this.configManager}`);
+    console.log(`   UIRenderer disponible: ${!!this.uiRenderer}`);
+    
+    this.currentView = viewName;
+    
+    // Ocultar todas las vistas primero
+    console.log('   Ocultando todas las vistas...');
+    this.hideAllViews();
+    
+    // Mostrar solo la vista solicitada
+    console.log(`   Renderizando vista ${viewName}...`);
+    switch(viewName) {
+        case 'main':
+            await this.renderMainView();
+            break;
+        case 'admin':
+            await this.renderAdminView();
+            break;
+        case 'bulk':
+            await this.renderBulkView();
+            break;
+        default:
+            console.warn(`   Vista no reconocida: ${viewName}`);
     }
+    
+    // Actualizar menú activo
+    console.log('   Actualizando menú activo...');
+    this.updateActiveMenu();
+    
+    console.log(`✅ Vista ${viewName} mostrada`);
+}
 
     async renderMainView() {
         const programs = this.configManager.getPrograms();
