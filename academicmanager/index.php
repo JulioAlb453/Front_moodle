@@ -35,6 +35,7 @@ window.moodleData = {
         <p>Cargando Academic Manager...</p>
     </div>
 </div>
+
 <style>
 /* ESTILOS TEMPORALES DE DIAGNÓSTICO */
 #academic-manager-app * {
@@ -74,156 +75,7 @@ window.moodleData = {
     font-size: 14px;
 }
 
-/* Layout principal */
-.am-container {
-    display: flex;
-    min-height: calc(100vh - 70px);
-}
-
-/* Sidebar */
-.am-sidebar {
-    width: 250px;
-    background: white;
-    border-right: 1px solid #e1e5eb;
-    padding: 20px 0;
-}
-
-.am-menu {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-}
-
-.menu-item {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 15px 25px;
-    color: #555;
-    text-decoration: none;
-    transition: all 0.3s;
-    border-left: 4px solid transparent;
-}
-
-.menu-item:hover {
-    background: #f8f9fa;
-    color: #3498db;
-    border-left-color: #3498db;
-}
-
-.menu-item.active {
-    background: #e3f2fd;
-    color: #3498db;
-    border-left-color: #3498db;
-    font-weight: bold;
-}
-
-/* Área principal */
-.am-main {
-    flex: 1;
-    padding: 25px;
-    background: #f8f9fa;
-}
-
-/* Cards */
-.card {
-    background: white;
-    border-radius: 8px;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.08);
-    margin-bottom: 20px;
-    overflow: hidden;
-}
-
-.card-header {
-    background: #f8f9fa;
-    padding: 18px 25px;
-    border-bottom: 1px solid #eaeaea;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-.card-header h3 {
-    color: #2c3e50;
-    font-size: 1.2rem;
-    margin: 0;
-}
-
-.card-body {
-    padding: 25px;
-}
-
-/* Formularios */
-.form-group {
-    margin-bottom: 20px;
-}
-
-.form-label {
-    display: block;
-    margin-bottom: 8px;
-    font-weight: 500;
-    color: #555;
-}
-
-.form-control {
-    width: 100%;
-    padding: 10px 15px;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    font-size: 14px;
-}
-
-/* Botones */
-.btn {
-    padding: 10px 20px;
-    border: none;
-    border-radius: 4px;
-    font-size: 14px;
-    font-weight: 500;
-    cursor: pointer;
-    text-decoration: none;
-    display: inline-block;
-}
-
-.btn-primary {
-    background: #3498db;
-    color: white;
-}
-
-.btn-success {
-    background: #27ae60;
-    color: white;
-}
-
-.btn-warning {
-    background: #f39c12;
-    color: white;
-}
-
-.btn-action {
-    background: #f8f9fa;
-    border: 1px solid #dee2e6;
-    color: #495057;
-    padding: 12px 25px;
-    text-align: left;
-    display: block;
-    width: 100%;
-    margin-bottom: 10px;
-    border-radius: 6px;
-}
-
-.btn-action:hover {
-    background: #e9ecef;
-    border-color: #adb5bd;
-}
-
-/* Grid de acciones */
-.actions-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-    gap: 15px;
-    margin-top: 20px;
-}
+/* ... mantén el resto de tus estilos ... */
 
 /* Loading spinner */
 #loading-message {
@@ -263,6 +115,7 @@ window.moodleData = {
     }
 }
 </style>
+
 <script>
 console.log('=== CARGA DE SCRIPTS ===');
 
@@ -307,7 +160,6 @@ function loadScript(src) {
         console.log('AcademicManager disponible:', typeof AcademicManager !== 'undefined');
         
         // 3. Solo crear la instancia - NO llamar init()
-        // La inicialización se hace automáticamente en app.js
         console.log('🚀 Academic Manager cargado');
         
         // Verificar que se inicializó
@@ -322,51 +174,9 @@ function loadScript(src) {
     } catch (error) {
         console.error('❌ Error cargando scripts:', error);
     }
-
-// Cargar scripts en orden
-(async () => {
-    try {
-        // 1. Mustache.js
-        await loadScript('<?php echo $CFG->wwwroot; ?>/local/academicmanager/js/mustache.min.js');
-        
-        // 2. Tus scripts
-        await loadScript('<?php echo $CFG->wwwroot; ?>/local/academicmanager/js/config-manager.js');
-        console.log('ConfigManager disponible:', typeof ConfigManager !== 'undefined');
-        
-        await loadScript('<?php echo $CFG->wwwroot; ?>/local/academicmanager/js/mustache-renderer.js');
-        console.log('MustacheRenderer disponible:', typeof MustacheRenderer !== 'undefined');
-        
-        await loadScript('<?php echo $CFG->wwwroot; ?>/local/academicmanager/js/ui-renderer.js');
-        console.log('UIRenderer disponible:', typeof UIRenderer !== 'undefined');
-        
-        await loadScript('<?php echo $CFG->wwwroot; ?>/local/academicmanager/js/routes.js');
-        console.log('Router disponible:', typeof Router !== 'undefined');
-        
-        await loadScript('<?php echo $CFG->wwwroot; ?>/local/academicmanager/js/app.js');
-        console.log('AcademicManager disponible:', typeof AcademicManager !== 'undefined');
-        
-        // 3. Inicializar después de que todo esté cargado
-  setTimeout(() => {
-    console.log('🚀 Iniciando Academic Manager...');
-    if (typeof AcademicManager !== 'undefined') {
-        // Solo crear la instancia, init() se llama automáticamente
-        window.academicManager = new AcademicManager();
-        console.log('✅ Academic Manager instancia creada');
-        
-        // Verificar estado después de un tiempo
-        setTimeout(() => {
-            if (window.academicManager && window.academicManager.isReady) {
-                console.log('✅ Academic Manager completamente inicializado');
-            }
-        }, 1000);
-    } else {
-        console.error('❌ AcademicManager no definido');
-    }
-}, 500);
-    } catch (error) {
-        console.error('❌ Error cargando scripts:', error);
-    }
 })();
 </script>
+
 <?php
 echo $OUTPUT->footer();
+?>
