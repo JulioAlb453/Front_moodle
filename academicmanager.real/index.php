@@ -1,5 +1,5 @@
 <?php
-require_once('/var/www/html/moodle/config.php');
+require_once('../../config.php');
 require_login();
 
 $PAGE->set_url(new moodle_url('/local/academicmanager/index.php'));
@@ -10,13 +10,6 @@ $PAGE->set_heading('Academic Manager');
 // Cargar CSS
 $PAGE->requires->css('/local/academicmanager/styles/main.css');
 $PAGE->requires->css('/local/academicmanager/styles/concurrent.css');
-$PAGE->requires->css('/local/academicmanager/styles/components/button.css');
-$PAGE->requires->css('/local/academicmanager/styles/components/card.css');
-$PAGE->requires->css('/local/academicmanager/styles/components/form.css');
-$PAGE->requires->css('/local/academicmanager/styles/components/table.css');
-$PAGE->requires->css('/local/academicmanager/styles/components/header.css');
-
-
 
 echo $OUTPUT->header();
 ?>
