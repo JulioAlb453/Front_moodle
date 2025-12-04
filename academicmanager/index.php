@@ -267,18 +267,11 @@ window.moodleData = {
 console.log('=== CARGA DE SCRIPTS ===');
 
 // Función para cargar scripts con verificación
-function loadScript(src, isModule = false) {
+function loadScript(src) {
     return new Promise((resolve, reject) => {
         console.log(`📦 Cargando: ${src}`);
         const script = document.createElement('script');
         script.src = src;
-        
-        if (isModule) {
-            script.type = 'module';
-        } else {
-            script.defer = true;
-        }
-        
         script.onload = () => {
             console.log(`✅ Cargado: ${src}`);
             resolve();
@@ -313,18 +306,63 @@ function loadScript(src, isModule = false) {
         await loadScript('<?php echo $CFG->wwwroot; ?>/local/academicmanager/js/app.js');
         console.log('AcademicManager disponible:', typeof AcademicManager !== 'undefined');
         
-        // 3. Inicializar después de que todo esté cargado
-        setTimeout(() => {
-            console.log('🚀 Iniciando Academic Manager...');
-            if (typeof AcademicManager !== 'undefined') {
-                window.academicManager = new AcademicManager();
-                window.academicManager.init();
-                console.log('✅ Academic Manager inicializado');
-            } else {
-                console.error('❌ AcademicManager no definido');
-            }
-        }, 500);
+        // 3. Solo crear la instancia - NO llamar init()
+        // La inicialización se hace automáticamente en app.js
+        console.log('🚀 Academic Manager cargado');
         
+        // Verificar que se inicializó
+        setTimeout(() => {
+            if (window.academicManager && window.academicManager.isReady) {
+                console.log('✅ Academic Manager completamente inicializado');
+            } else {
+                console.log('⏳ Academic Manager aún inicializando...');
+            }
+        }, 1000);
+        
+    } catch (error) {
+        console.error('❌ Error cargando scripts:', error);
+    }
+
+// Cargar scripts en orden
+(async () => {
+    try {
+        // 1. Mustache.js
+        await loadScript('<?php echo $CFG->wwwroot; ?>/local/academicmanager/js/mustache.min.js');
+        
+        // 2. Tus scripts
+        await loadScript('<?php echo $CFG->wwwroot; ?>/local/academicmanager/js/config-manager.js');
+        console.log('ConfigManager disponible:', typeof ConfigManager !== 'undefined');
+        
+        await loadScript('<?php echo $CFG->wwwroot; ?>/local/academicmanager/js/mustache-renderer.js');
+        console.log('MustacheRenderer disponible:', typeof MustacheRenderer !== 'undefined');
+        
+        await loadScript('<?php echo $CFG->wwwroot; ?>/local/academicmanager/js/ui-renderer.js');
+        console.log('UIRenderer disponible:', typeof UIRenderer !== 'undefined');
+        
+        await loadScript('<?php echo $CFG->wwwroot; ?>/local/academicmanager/js/routes.js');
+        console.log('Router disponible:', typeof Router !== 'undefined');
+        
+        await loadScript('<?php echo $CFG->wwwroot; ?>/local/academicmanager/js/app.js');
+        console.log('AcademicManager disponible:', typeof AcademicManager !== 'undefined');
+        
+        // 3. Inicializar después de que todo esté cargado
+  setTimeout(() => {
+    console.log('🚀 Iniciando Academic Manager...');
+    if (typeof AcademicManager !== 'undefined') {
+        // Solo crear la instancia, init() se llama automáticamente
+        window.academicManager = new AcademicManager();
+        console.log('✅ Academic Manager instancia creada');
+        
+        // Verificar estado después de un tiempo
+        setTimeout(() => {
+            if (window.academicManager && window.academicManager.isReady) {
+                console.log('✅ Academic Manager completamente inicializado');
+            }
+        }, 1000);
+    } else {
+        console.error('❌ AcademicManager no definido');
+    }
+}, 500);
     } catch (error) {
         console.error('❌ Error cargando scripts:', error);
     }
