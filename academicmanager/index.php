@@ -267,11 +267,18 @@ window.moodleData = {
 console.log('=== CARGA DE SCRIPTS ===');
 
 // Función para cargar scripts con verificación
-function loadScript(src) {
+function loadScript(src, isModule = false) {
     return new Promise((resolve, reject) => {
         console.log(`📦 Cargando: ${src}`);
         const script = document.createElement('script');
         script.src = src;
+        
+        if (isModule) {
+            script.type = 'module';
+        } else {
+            script.defer = true;
+        }
+        
         script.onload = () => {
             console.log(`✅ Cargado: ${src}`);
             resolve();
