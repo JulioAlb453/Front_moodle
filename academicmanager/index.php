@@ -7,7 +7,7 @@ $PAGE->set_context(context_system::instance());
 $PAGE->set_title('Academic Manager');
 $PAGE->set_heading('Academic Manager');
 
-// Cargar CSS - CORREGIDO
+// Cargar CSS
 $PAGE->requires->css('/local/academicmanager/styles/main.css');
 $PAGE->requires->css('/local/academicmanager/styles/components/buttons.css');
 $PAGE->requires->css('/local/academicmanager/styles/components/cards.css');
@@ -28,29 +28,12 @@ window.moodleData = {
 };
 </script>
 
-<!-- Cargar Mustache.js primero -->
-<script src="<?php echo $CFG->wwwroot; ?>/local/academicmanager/js/mustache.min.js"></script>
-
-<!-- Cargar tus archivos JavaScript -->
-<script src="<?php echo $CFG->wwwroot; ?>/local/academicmanager/js/config-manager.js"></script>
-<script src="<?php echo $CFG->wwwroot; ?>/local/academicmanager/js/mustache-renderer.js"></script>
-<script src="<?php echo $CFG->wwwroot; ?>/local/academicmanager/js/ui-renderer.js"></script>
-<script src="<?php echo $CFG->wwwroot; ?>/local/academicmanager/js/routes.js"></script>
-<script src="<?php echo $CFG->wwwroot; ?>/local/academicmanager/js/app.js"></script>
-
-<!-- Solo el contenedor principal - NO MÁS HTML -->
+<!-- Solo el contenedor principal -->
 <div id="academic-manager-app">
     <div id="loading-message">
         <div class="spinner"></div>
         <p>Cargando Academic Manager...</p>
     </div>
-    <div style="position: fixed; bottom: 10px; right: 10px; z-index: 9999; background: white; padding: 10px; border: 2px solid #3498db; border-radius: 5px;">
-    <h4>Navegación de prueba:</h4>
-    <button onclick="window.academicManager.showView('main')" style="margin: 5px;">Vista Main</button>
-    <button onclick="window.academicManager.showView('admin')" style="margin: 5px;">Vista Admin</button>
-    <button onclick="window.academicManager.showView('bulk')" style="margin: 5px;">Vista Bulk</button>
-    <button onclick="window.academicManager.showForm('program')" style="margin: 5px;">Form Programa</button>
-</div>
 </div>
 <style>
 /* ESTILOS TEMPORALES DE DIAGNÓSTICO */
@@ -341,6 +324,4 @@ function loadScript(src) {
 })();
 </script>
 <?php
-
-
 echo $OUTPUT->footer();
