@@ -221,10 +221,87 @@ class AcademicManager {
             `;
         }
     }
+    
 }
+
+// DEPURACIÓN: Encontrar y corregir botones con onclick problemáticos
+function fixProblematicButtons() {
+    console.log('🔍 Buscando botones con onclick problemáticos...');
+    
+    // Buscar TODOS los botones en la página
+    const allButtons = document.querySelectorAll('button');
+    let foundProblems = false;
+    
+    allButtons.forEach(button => {
+        const onclick = button.getAttribute('onclick');
+        
+        if (onclick && onclick.includes('showCreate')) {
+            console.warn('⚠️ Botón con onclick problemático encontrado:', button);
+            console.log('  - onclick:', onclick);
+            console.log('  - HTML:', button.outerHTML);
+            console.log('  - Padre:', button.parentElement?.outerHTML?.substring(0, 100));
+            
+            foundProblems = true;
+            
+            // Reemplazar onclick con data-action
+            if (onclick.includes('showCreateProgramForm')) {
+                button.setAttribute('data-action', 'show-program-form');
+                console.log('  → Corregido: data-action="show-program-form"');
+            } 
+            else if (onclick.includes('showCreateSubjectForm')) {
+                button.setAttribute('data-action', 'show-subject-form');
+                console.log('  → Corregido: data-action="show-subject-form"');
+            } 
+            else if (onclick.includes('showCreateTeacherForm')) {
+                button.setAttribute('data-action', 'show-teacher-form');
+                console.log('  → Corregido: data-action="show-teacher-form"');
+            }
+            
+            // Remover el atributo onclick
+            button.removeAttribute('onclick');
+        }
+    });
+    
+    if (!foundProblems) {
+        console.log('✅ No se encontraron botones con onclick problemáticos');
+    }
+}
+
+// Ejecutar después de que se renderice todo
+setTimeout(fixProblematicButtons, 2000);
+
 
 // Inicialización
 document.addEventListener('DOMContentLoaded', function() {
     window.academicManager = new AcademicManager();
     window.academicManager.init();
 });
+
+window.showCreateProgramForm = function() {
+    console.log('📝 showCreateProgramForm llamado');
+    if (window.academicManager && window.academicManager.router) {
+        window.academicManager.router.navigate('form-program');
+    } else {
+        console.error('Academic Manager o Router no disponibles');
+    }
+};
+
+window.showCreateSubjectForm = function() {
+    console.log('📝 showCreateSubjectForm llamado');
+    if (window.academicManager && window.academicManager.router) {
+        window.academicManager.router.navigate('form-subject');
+    } else {
+        console.error('Academic Manager o Router no disponibles');
+    }
+};
+
+window.showCreateTeacherForm = function() {
+    console.log('📝 showCreateTeacherForm llamado');
+    if (window.academicManager && window.academicManager.router) {
+        window.academicManager.router.navigate('form-teacher');
+    } else {
+        console.error('Academic Manager o Router no disponibles');
+    }
+};
+
+console.log('✅ Funciones globales definidas temporalmente');

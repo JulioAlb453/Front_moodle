@@ -1,36 +1,53 @@
-<div class="card">
-    <div class="card-header">
-        <h3>Panel de Administración</h3>
-    </div>
-    <div class="card-body">
-        <div class="actions-section">
-            <h4>Acciones Individuales</h4>
-            <div class="actions-grid">
-                <button class="btn-action" data-action="show-program-form">
-                    <i class="fa fa-plus-circle"></i> Crear Programa
-                </button>
-                <button class="btn-action" data-action="show-subject-form">
-                    <i class="fa fa-book"></i> Crear Asignatura
-                </button>
-                <button class="btn-action" data-action="show-teacher-form">
-                    <i class="fa fa-user-plus"></i> Crear Docente
-                </button>
-            </div>
+<div class="academic-manager">
+    <header class="am-header">
+        <h1><i class="fa fa-graduation-cap"></i> Academic Manager</h1>
+        <div class="user-info">
+            <span class="user-name">{{userName}}</span>
+            <a href="{{baseUrl}}/login/logout.php" class="btn-logout">
+                <i class="fa fa-sign-out"></i> Salir
+            </a>
         </div>
-        
-        <div class="actions-section" style="margin-top: 30px;">
-            <h4>Acciones Masivas</h4>
-            <div class="actions-grid">
-                <button class="btn-action" data-action="bulk-verify">
-                    <i class="fa fa-check-circle"></i> Verificar Cursos (Todos)
-                </button>
-                <button class="btn-action" data-action="bulk-create-courses">
-                    <i class="fa fa-rocket"></i> Crear Cursos (Todos)
-                </button>
-                <button class="btn-action" data-action="bulk-create-users">
-                    <i class="fa fa-users"></i> Crear Usuarios (Todos)
-                </button>
+    </header>
+
+    <div class="am-container">
+        <nav class="am-sidebar">
+            <ul class="am-menu">
+                <li>
+                    <a href="#" class="menu-item {{#activeMain}}active{{/activeMain}}" data-view="main">
+                        <i class="fa fa-home"></i> Inicio
+                    </a>
+                </li>
+                <li>
+                    <a href="#" class="menu-item {{#activeAdmin}}active{{/activeAdmin}}" data-view="admin">
+                        <i class="fa fa-cog"></i> Administración
+                    </a>
+                </li>
+                <li>
+                    <a href="#" class="menu-item {{#activeBulk}}active{{/activeBulk}}" data-view="bulk">
+                        <i class="fa fa-bolt"></i> Acciones Masivas
+                    </a>
+                </li>
+            </ul>
+        </nav>
+
+        <main class="am-main">
+            <!-- Vista Principal -->
+            <div id="main-view" class="view" style="display: {{#showMainView}}block{{/showMainView}}{{^showMainView}}none{{/showMainView}};">
+                <div id="selection-container"></div>
+                <div id="subjects-container"></div>
             </div>
-        </div>
+
+            <!-- Vista Administración -->
+            <div id="admin-view" class="view" style="display: {{#showAdminView}}block{{/showAdminView}}{{^showAdminView}}none{{/showAdminView}};">
+                <div id="admin-container"></div>
+                <div id="form-container" style="display: none;"></div>
+            </div>
+
+            <!-- Vista Acciones Masivas -->
+            <div id="bulk-view" class="view" style="display: {{#showBulkView}}block{{/showBulkView}}{{^showBulkView}}none{{/showBulkView}};">
+                <div id="bulk-actions-container"></div>
+                <div id="results-container"></div>
+            </div>
+        </main>
     </div>
 </div>
