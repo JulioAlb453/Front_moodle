@@ -33,6 +33,22 @@ async function initAcademicManager() {
     console.log("🚀 Iniciando Academic Manager...");
     
     try {
+         // 0. Registrar datos de Moodle en ConfigManager
+    if (window.moodleData) {
+        console.log("Registrando usuario de Moodle en ConfigManager:", window.moodleData);
+
+        this.configManager.set('user', {
+            id: window.moodleData.userId,
+            name: window.moodleData.userName,
+            sesskey: window.moodleData.sesskey,
+            baseUrl: window.moodleData.baseUrl
+        });
+    } else {
+        console.warn("⚠️ No existe window.moodleData");
+    }
+
+
+
         // 1. Inicializar ConfigManager (carga configuración de Moodle)
         configManager = new ConfigManager();
         await configManager.loadConfig();
@@ -55,7 +71,7 @@ async function initAcademicManager() {
         
         // 5. Renderizar interfaz principal en el contenedor
         console.log("🏠 Renderizando interfaz en Moodle...");
-        await uiRenderer.renderMainInterface(container);
+       // await uiRenderer.renderMainInterface(container);
         console.log("✅ Interfaz renderizada");
         
         // 6. Inicializar Router

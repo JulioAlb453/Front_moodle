@@ -13,7 +13,8 @@ class MustacheRenderer {
     this.templates = {};
     this.templatesLoaded = false;
     this.loadingPromise = null;
-    this.templateBasePath = "/local/academicmanager/templates/";
+    this.templateBasePath = window.moodleData.baseUrl + "/local/academicmanager/templates/";
+
 
     MustacheRenderer.instance = this;
     console.log("📄 MustacheRenderer creado");

@@ -180,7 +180,7 @@ class Router {
         
         try {
             // Ejecutar middlewares antes de la navegación
-            const middlewareResult = await this.executeMiddlewares(route, params, 'before');
+           const middlewareResult = await this.executeMiddlewares(route, params, 'before');
             if (middlewareResult === false) {
                 console.log("⏹️ Navegación cancelada por middleware");
                 return false;
