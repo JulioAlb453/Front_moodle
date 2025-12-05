@@ -13,8 +13,8 @@ class MustacheRenderer {
     this.templates = {};
     this.templatesLoaded = false;
     this.loadingPromise = null;
-    this.templateBasePath = window.moodleData.baseUrl + "/local/academicmanager/templates/";
-
+    this.templateBasePath =
+      window.moodleData.baseUrl + "/local/academicmanager/templates/";
 
     MustacheRenderer.instance = this;
     console.log("📄 MustacheRenderer creado");
@@ -41,30 +41,16 @@ class MustacheRenderer {
     console.log("📦 Iniciando carga de templates...");
 
     // Lista de templates por defecto
-    const defaultTemplates = templateList || [
+    const defaultTemplates = [
       "main-interface",
-      "navigation",
-      "header",
-      "dashboard-view",
-      "courses-view",
-      "students-view",
-      "grades-view",
-      "reports-view",
-      "bulk-actions-view",
-      "admin-view",
-      "settings-view",
-      "modal",
-      "error-view",
-      "loading-view",
-      "forms/course-form",
-      "forms/student-form",
-      "forms/grade-form",
-      "tables/courses-table",
-      "tables/students-table",
-      "tables/grades-table",
-      "cards/stats-card",
-      "cards/info-card",
-      "cards/action-card",
+      "admin-panel",
+      "bulk-actions",
+      "results",
+      "selection",
+      "subjects",
+      "forms/program-form",
+      "forms/subject-form",
+      "forms/teacher-form",
     ];
 
     // Crear promesa de carga
