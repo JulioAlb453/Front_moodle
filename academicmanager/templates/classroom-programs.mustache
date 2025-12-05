@@ -1,0 +1,25 @@
+<div class="programs-view">
+    <div class="view-header">
+        <h2>Programas de Estudio</h2>
+        <button class="btn btn-primary" id="btnNewProgram">
+            <span class="icon">➕</span> Nuevo Programa
+        </button>
+    </div>
+    
+    <div class="programs-list">
+        {{#programs}}
+        <div class="program-card">
+            <h3>{{nombre}}</h3>
+            <p>{{descripcion}}</p>
+            <button class="btn btn-secondary" data-action="view-program" data-id="{{id}}">
+                Ver Detalles
+            </button>
+        </div>
+        {{/programs}}
+        {{^programs}}
+        <div class="info-message">
+            <p>No hay programas de estudio disponibles</p>
+        </div>
+        {{/programs}}
+    </div>
+</div>

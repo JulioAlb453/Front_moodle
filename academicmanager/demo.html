@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Academic Classroom - Demo</title>
+    <link rel="stylesheet" href="styles/classroom.css">
+</head>
+<body>
+    <!-- Datos de demostración -->
+    <script>
+    window.moodleData = {
+        baseUrl: '',
+        sesskey: 'demo-session',
+        userId: 1,
+        userName: 'Usuario Demo'
+    };
+    </script>
+
+    <!-- Cargar JavaScript -->
+    <script src="js/config.js"></script>
+    <script src="js/api-client.js"></script>
+    <script src="js/classroom-app.js"></script>
+
+    <!-- Contenedor principal -->
+    <div id="academic-manager-app">
+        <div class="loading">Cargando Academic Classroom...</div>
+    </div>
+
+    <!-- Inicializar aplicación -->
+    <script>
+    document.addEventListener('DOMContentLoaded', async function() {
+        try {
+            console.log('🚀 Iniciando Demo de Academic Classroom');
+            
+            // Verificar que la API esté disponible
+            console.log('📡 Verificando conexión con API...');
+            console.log('URL de API:', ClassroomConfig.API_URL);
+            
+            window.classroomApp = new ClassroomApp();
+            await classroomApp.init();
+            
+            console.log('✅ Demo cargada correctamente');
+            
+        } catch (error) {
+            console.error('❌ Error inicializando Classroom App:', error);
+            
+            const container = document.getElementById('academic-manager-app');
+            container.innerHTML = `
+                <div style="padding: 40px; text-align: center;">
+                    <div style="background: #ffebee; padding: 30px; border-radius: 8px; max-width: 600px; margin: 0 auto;">
+                        <h2 style="color: #d32f2f; margin-bottom: 16px;">⚠️ Error al cargar la aplicación</h2>
+                        <p style="color: #666; margin-bottom: 20px;">${error.message}</p>
+                        
+                        <div style="background: white; padding: 20px; border-radius: 4px; text-align: left; margin-top: 20px;">
+                            <h3 style="margin-bottom: 12px;">Pasos para solucionar:</h3>
+                            <ol style="color: #666; line-height: 1.8;">
+                                <li>Asegúrate de que la API esté corriendo:
+                                    <pre style="background: #f5f5f5; padding: 10px; margin: 8px 0; border-radius: 4px;">cd api
+npm run dev</pre>
+                                </li>
+                                <li>Verifica la URL de la API en <code>js/config.js</code></li>
+                                <li>Verifica que CORS esté habilitado en la API</li>
+                                <li>Abre la consola del navegador (F12) para más detalles</li>
+                            </ol>
+                        </div>
+                        
+                        <button onclick="location.reload()" style="
+                            margin-top: 20px;
+                            padding: 12px 24px;
+                            background: #1976d2;
+                            color: white;
+                            border: none;
+                            border-radius: 4px;
+                            cursor: pointer;
+                            font-size: 14px;
+                            font-weight: 500;
+                        ">
+                            🔄 Reintentar
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+    });
+    </script>
+
+    <!-- Información de Demo -->
+    <div style="
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        background: rgba(0, 0, 0, 0.8);
+        color: white;
+        padding: 12px 20px;
+        border-radius: 8px;
+        font-size: 12px;
+        z-index: 9999;
+    ">
+        🎓 Modo Demo - Academic Classroom v1.0
+    </div>
+</body>
+</html>

@@ -17,7 +17,7 @@ class MustacheRenderer {
       window.moodleData.baseUrl + "/local/academicmanager/templates/";
 
     MustacheRenderer.instance = this;
-    console.log("📄 MustacheRenderer creado");
+    console.log(" MustacheRenderer creado");
   }
 
   /**
@@ -28,17 +28,17 @@ class MustacheRenderer {
 
     // Si ya están cargados, retornar inmediatamente
     if (instance.templatesLoaded) {
-      console.log("✅ Templates ya cargados");
+      console.log(" Templates ya cargados");
       return instance.templates;
     }
 
     // Si ya se está cargando, retornar la promesa existente
     if (instance.loadingPromise) {
-      console.log("⏳ Templates ya se están cargando...");
+      console.log(" Templates ya se están cargando...");
       return instance.loadingPromise;
     }
 
-    console.log("📦 Iniciando carga de templates...");
+    console.log(" Iniciando carga de templates...");
 
     // Lista de templates por defecto
     const defaultTemplates = [

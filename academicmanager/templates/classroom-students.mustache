@@ -1,0 +1,42 @@
+<div class="students-view">
+    <div class="view-header">
+        <h2>Estudiantes</h2>
+        <button class="btn btn-primary" id="btnNewStudent">
+            <span class="icon">➕</span> Nuevo Estudiante
+        </button>
+    </div>
+    
+    <div class="students-table">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Nombre</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                {{#students}}
+                <tr>
+                    <td>{{id}}</td>
+                    <td>
+                        <div class="student-info">
+                            <div class="avatar">{{initial}}</div>
+                            <span>{{nombre}}</span>
+                        </div>
+                    </td>
+                    <td>
+                        <button class="btn-icon" data-action="edit" data-id="{{id}}">✏️</button>
+                        <button class="btn-icon" data-action="delete" data-id="{{id}}">🗑️</button>
+                    </td>
+                </tr>
+                {{/students}}
+                {{^students}}
+                <tr>
+                    <td colspan="3" class="text-center">No hay estudiantes registrados</td>
+                </tr>
+                {{/students}}
+            </tbody>
+        </table>
+    </div>
+</div>

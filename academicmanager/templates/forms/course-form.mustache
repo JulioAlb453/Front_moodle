@@ -1,0 +1,20 @@
+<form id="courseForm" class="form">
+    <div class="form-group">
+        <label>Nombre del Curso</label>
+        <input type="text" name="nombre" class="form-control" 
+               value="{{nombre}}" required>
+    </div>
+    <div class="form-group">
+        <label>Cuatrimestre</label>
+        <input type="number" name="cuatrimestre" class="form-control" 
+               value="{{cuatrimestre}}" min="1" max="12" required>
+    </div>
+    <div class="form-actions">
+        <button type="submit" class="btn btn-primary">
+            {{#isEdit}}Actualizar{{/isEdit}}{{^isEdit}}Crear{{/isEdit}}
+        </button>
+        <button type="button" class="btn btn-secondary" data-action="close-modal">
+            Cancelar
+        </button>
+    </div>
+</form>

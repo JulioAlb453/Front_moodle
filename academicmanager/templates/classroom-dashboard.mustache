@@ -1,0 +1,39 @@
+<div class="dashboard-view">
+    <div class="view-header">
+        <h2>Mis Cursos</h2>
+        <button class="btn btn-primary" id="btnNewCourse">
+            <span class="icon">➕</span> Nuevo Curso
+        </button>
+    </div>
+    
+    <div class="courses-grid" id="coursesGrid">
+        {{#courses}}
+        <div class="course-card" data-id="{{id}}" style="border-top: 4px solid {{color}}">
+            <div class="course-header" style="background: {{color}}">
+                <h3 class="course-title">{{nombre}}</h3>
+                <p class="course-subtitle">Cuatrimestre {{cuatrimestre}}</p>
+            </div>
+            <div class="course-body">
+                <div class="course-info">
+                    <span class="info-item">
+                        <span class="icon">👥</span>
+                        <span>{{studentCount}} estudiantes</span>
+                    </span>
+                    <span class="info-item">
+                        <span class="icon">📝</span>
+                        <span>{{taskCount}} tareas</span>
+                    </span>
+                </div>
+            </div>
+            <div class="course-footer">
+                <button class="btn-icon" title="Más opciones">⋮</button>
+            </div>
+        </div>
+        {{/courses}}
+        {{^courses}}
+        <div class="info-message">
+            <p>No hay cursos disponibles. Crea tu primer curso.</p>
+        </div>
+        {{/courses}}
+    </div>
+</div>

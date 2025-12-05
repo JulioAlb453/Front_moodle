@@ -1,0 +1,45 @@
+<div class="classroom-app">
+    <header class="classroom-header">
+        <div class="header-left">
+            <button class="menu-toggle" id="menuToggle">
+                <span class="icon">☰</span>
+            </button>
+            <h1 class="app-title">Academic Classroom</h1>
+        </div>
+        <div class="header-right">
+            <div class="user-menu">
+                <span class="user-name">{{userName}}</span>
+                <div class="user-avatar">{{userInitial}}</div>
+            </div>
+        </div>
+    </header>
+
+    <aside class="classroom-sidebar" id="sidebar">
+        <nav class="sidebar-nav">
+            <a href="#" class="nav-item active" data-view="dashboard">
+                <span class="icon">🏠</span>
+                <span class="label">Inicio</span>
+            </a>
+            <a href="#" class="nav-item" data-view="courses">
+                <span class="icon">📚</span>
+                <span class="label">Mis Cursos</span>
+            </a>
+            <a href="#" class="nav-item" data-view="students">
+                <span class="icon">👥</span>
+                <span class="label">Estudiantes</span>
+            </a>
+            <a href="#" class="nav-item" data-view="grades">
+                <span class="icon">📊</span>
+                <span class="label">Calificaciones</span>
+            </a>
+            <a href="#" class="nav-item" data-view="programs">
+                <span class="icon">📋</span>
+                <span class="label">Programas</span>
+            </a>
+        </nav>
+    </aside>
+
+    <main class="classroom-main" id="mainContent">
+        <div id="viewContainer"></div>
+    </main>
+</div>
