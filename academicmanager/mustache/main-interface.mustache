@@ -1,0 +1,45 @@
+<div class="academic-manager">
+    <header class="am-header">
+        <h1>Academic Manager</h1>
+        <div class="user-info">
+            <span class="user-name">{{userName}}</span>
+        </div>
+    </header>
+
+    <div class="am-container">
+        <nav class="am-sidebar">
+            <ul class="am-menu">
+                <li>
+                    <a href="#" class="menu-item" data-view="main">
+                        Inicio
+                    </a>
+                </li>
+                <li>
+                    <a href="#" class="menu-item" data-view="admin">
+                        Administración
+                    </a>
+                </li>
+                <li>
+                    <a href="#" class="menu-item" data-view="bulk">
+                        Acciones Masivas
+                    </a>
+                </li>
+            </ul>
+        </nav>
+
+        <main class="am-main">
+            <div id="main-view" class="view">
+                <div id="selection-container"></div>
+            </div>
+
+            <div id="admin-view" class="view">
+                <div id="admin-container"></div>
+                <div id="form-container" style="display: none;"></div>
+            </div>
+
+            <div id="bulk-view" class="view">
+                <div id="bulk-actions-container"></div>
+            </div>
+        </main>
+    </div>
+</div>

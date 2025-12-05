@@ -2,6 +2,7 @@
 require_once('/var/www/html/moodle/config.php');
 require_login();
 
+
 $PAGE->set_url(new moodle_url('/local/academicmanager/index.php'));
 $PAGE->set_context(context_system::instance());
 $PAGE->set_title('Academic Manager');
